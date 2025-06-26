@@ -19,7 +19,7 @@ fluid_impedance_db = {
     "Other": None
 }
 
-st.title("NMDT Ultrasonic Response Simulator")
+st.title("NMDT Ultrasonic Response Simulator v2")
 
 # --- Fluid Input ---
 fluid = st.selectbox("Select Fluid Type", list(fluid_impedance_db.keys()))
