@@ -1,6 +1,8 @@
+
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 from scipy.fft import fft, fftfreq
 
 INCH_TO_METER = 0.0254
@@ -16,8 +18,8 @@ fluid_impedance_db = {
     "Other": None
 }
 
-st.set_page_config(page_title="NMDT Simulator", layout="wide")
-st.title("🔍 Non-Metallic Tubular Defectoscope (NMDT) Simulator")
+st.set_page_config(page_title="NMTD Simulator", layout="wide")
+st.markdown("<h1 style='text-align: center; color: navy;'>🔍 Non-Metallic Tubular Defectoscope (NMDT) Simulator</h1>", unsafe_allow_html=True)
 
 tab1, tab2, tab3 = st.tabs(["⚙️ Configuration", "📊 Results", "📐 Drawing"])
 
@@ -84,58 +86,71 @@ with tab2:
                                             defect_type if defect_type != "None" else None,
                                             defect_layer - 1)
 
-        fig, ax = plt.subplots(figsize=(10, 4))
+        # Plotly time-domain interactive plot
+        time_fig = go.Figure()
         if show_perfect and superpose:
-            ax.plot(t_p, s_p, '--', alpha=0.6, label="Perfect Pipe")
-        ax.plot(t_d, s_d, color='red', label="Defective Pipe")
+            time_fig.add_trace(go.Scatter(x=t_p, y=s_p, mode='lines', name='Perfect Pipe',
+                                          line=dict(dash='dash', color='green')))
+        time_fig.add_trace(go.Scatter(x=t_d, y=s_d, mode='lines', name='Defective Pipe',
+                                      line=dict(color='red')))
         for t, a in zip(e_d, a_d):
-            ax.axvline(t, color='gray', linestyle=':', alpha=0.4)
-            ax.annotate(f"{t:.2f} µs\nA={a:.2f}", xy=(t, a), xytext=(t + 0.5, a),
-                        arrowprops=dict(arrowstyle="->", lw=0.5))
-        ax.axvline(TT_d, color='blue', linestyle='--', label=f"TT_fluid: {TT_d:.2f} µs")
-        ax.set_xlabel("Time (µs)")
-        ax.set_ylabel("Amplitude")
-        ax.set_title("🟢 A-Scan (Time Domain)")
-        ax.grid(True)
-        ax.legend()
-        st.pyplot(fig)
+            time_fig.add_vline(x=t, line_width=1, line_dash="dot", line_color="gray")
+        time_fig.add_vline(x=TT_d, line_width=2, line_dash="dash", line_color="blue",
+                           annotation_text=f"TT_fluid = {TT_d:.2f} µs", annotation_position="top left")
+        time_fig.update_layout(title="🟢 A-Scan (Time Domain)", xaxis_title="Time (µs)",
+                               yaxis_title="Amplitude", hovermode="x unified")
+        st.plotly_chart(time_fig, use_container_width=True)
 
-        # FFT
+        # FFT plot
         dt = 1e-6
         freqs = fftfreq(len(t_d), dt)
         fft_d = np.abs(fft(s_d))
         fft_p = np.abs(fft(s_p)) if show_perfect and superpose else None
 
-        fig2, ax2 = plt.subplots(figsize=(10, 3))
+        freq_fig = go.Figure()
         if fft_p is not None:
-            ax2.plot(freqs[:len(freqs)//2], fft_p[:len(freqs)//2], '--', alpha=0.6, label="Perfect Pipe")
-        ax2.plot(freqs[:len(freqs)//2], fft_d[:len(freqs)//2], color='red', label="Defective Pipe")
-        ax2.set_xlim(0.1e6, 2e6)
-        ax2.set_xlabel("Frequency (Hz)")
-        ax2.set_ylabel("Magnitude")
-        ax2.set_title("🔵 Frequency Domain (Zoomed 100 kHz – 2 MHz)")
-        ax2.grid(True)
-        ax2.legend()
-        st.pyplot(fig2)
+            freq_fig.add_trace(go.Scatter(x=freqs[:len(freqs)//2], y=fft_p[:len(freqs)//2],
+                                          mode='lines', name='Perfect Pipe', line=dict(dash='dash')))
+        freq_fig.add_trace(go.Scatter(x=freqs[:len(freqs)//2], y=fft_d[:len(freqs)//2],
+                                      mode='lines', name='Defective Pipe', line=dict(color='red')))
+        freq_fig.update_layout(title="🔵 Frequency Domain (Zoomed 100 kHz – 2 MHz)",
+                               xaxis_title="Frequency (Hz)", yaxis_title="Magnitude",
+                               xaxis_range=[1e5, 2e6])
+        st.plotly_chart(freq_fig, use_container_width=True)
 
         st.success(f"Simulation complete. TT_fluid = {TT_d:.2f} µs")
 
 with tab3:
-    st.header("📐 Pipe Cross Section (Sensor View)")
-    fig, ax = plt.subplots(figsize=(6, 6))
+    st.header("📐 Pipe Geometry and Tool Placement")
+    fig, ax = plt.subplots(figsize=(10, 2))
     total_thickness = sum([t for _, t, _ in layer_data])
-    y_start = 0
+    x_start = 0
     cmap = plt.get_cmap('tab20')
-    ax.bar(x=0.5, height=DEFAULT_GAP_INCH, width=1, bottom=y_start, color='skyblue', edgecolor='black')
-    ax.text(0.5, y_start + DEFAULT_GAP_INCH/2, f"Fluid\nZ_fluid={Z_fluid:.2f}", ha='center', va='center')
-    y_start += DEFAULT_GAP_INCH
+    ax.barh(y=0.5, width=DEFAULT_GAP_INCH, height=1, left=x_start, color='skyblue', edgecolor='black')
+    ax.text(x_start + DEFAULT_GAP_INCH/2, 0.5, f"Fluid\nZ_fluid={Z_fluid:.2f}", ha='center', va='center')
+    x_start += DEFAULT_GAP_INCH
     for i, (label, thickness, Z) in enumerate(layer_data):
-        ax.bar(x=0.5, height=thickness, width=1, bottom=y_start, color=cmap(i), edgecolor='black')
-        ax.text(0.5, y_start + thickness/2, f"{label}\nZ={Z:.2f} MRayl\n{thickness:.2f} in",
-                ha='center', va='center', fontsize=9)
-        y_start += thickness
-    ax.set_ylim(0, y_start + 0.5)
-    ax.set_xlim(0, 1)
+        ax.barh(y=0.5, width=thickness, height=1, left=x_start, color=cmap(i), edgecolor='black')
+        ax.text(x_start + thickness/2, 0.5, f"{label}\nZ={Z:.2f}\n{thickness:.2f} in", ha='center', va='center')
+        x_start += thickness
+    ax.set_xlim(0, x_start)
+    ax.set_ylim(0, 1)
     ax.axis('off')
-    ax.set_title(f"Total Pipe Thickness: {total_thickness:.2f} in", fontsize=11)
+    ax.set_title(f"Pipe Thickness View (Rotated) | Total Thickness: {total_thickness:.2f} in", fontsize=11)
     st.pyplot(fig)
+
+    st.subheader("🛠 Tool Inside Pipe (Concept)")
+    tool_fig, tool_ax = plt.subplots(figsize=(4, 8))
+    pipe_radius = 1.5
+    tool_radius = 0.5
+    pipe_height = 6
+    tool_ax.add_patch(plt.Circle((0, pipe_height / 2), pipe_radius, fill=False, linewidth=2))
+    tool_ax.add_patch(plt.Rectangle((-tool_radius, 2), 2 * tool_radius, 2, color='gray'))
+    tool_ax.plot([-pipe_radius, -tool_radius], [3, 3], color='red', linewidth=3)
+    tool_ax.plot([pipe_radius, tool_radius], [3, 3], color='red', linewidth=3)
+    tool_ax.text(0, 3.5, "Pads", ha='center')
+    tool_ax.set_xlim(-2, 2)
+    tool_ax.set_ylim(0, pipe_height)
+    tool_ax.set_aspect('equal')
+    tool_ax.axis('off')
+    st.pyplot(tool_fig)
