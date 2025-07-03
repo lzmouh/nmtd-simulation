@@ -45,9 +45,8 @@ if page == "Simulator":
     with col2:
         num_layers = st.slider("Number of Layers", 1, 10, 5)
 
-    # Use columns to align thickness and impedance inputs
     layer_data = []
-    st.markdown("### 🛠️ Layer Configuration")
+    st.markdown("### 📦 Layers Configuration")
     for i in range(num_layers):
         c1, c2 = st.columns(2)
         with c1:
@@ -55,7 +54,7 @@ if page == "Simulator":
         with c2:
             z = st.number_input(f"Layer {i+1} Impedance (MRayl)", value=2.5, key=f"z{i}")
         layer_data.append((f"Layer {i+1}", t, z))
-
+    
     pipe_thickness = sum([t for _, t, _ in layer_data])
 
     with col2:
