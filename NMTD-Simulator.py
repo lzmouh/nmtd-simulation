@@ -100,8 +100,8 @@ elif page == "Plots":
     
     layer_data = st.session_state.get("layer_data", [])
     Z_fluid = st.session_state.get("Z_fluid", 1.48)
-    defect_type = st.session_state.get("defect_type")
-    defect_layer = st.session_state.get("defect_layer")
+    defect_layer = st.session_state.get("defect_layer", 1)
+    defect_type = st.session_state.get("defect_type", "None")
     
     st.subheader("📈 Display Options")
     show_perfect = st.checkbox("Show Perfect Pipe", True)
