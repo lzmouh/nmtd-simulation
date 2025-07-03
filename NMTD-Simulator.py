@@ -135,10 +135,11 @@ elif page == "Visualization":
 
     layer_data = st.session_state.get("layer_data", [])
     Z_fluid = st.session_state.get("Z_fluid", 1.48)
+    defect_type = st.session_state.get("defect_type")
+    defect_layer = st.session_state.get("defect_layer")
+    
     num_layers = len(layer_data)
-    defect_type = st.selectbox("Visualize Defect", ["None", "Delamination", "Crack"])
-    defect_layer = st.slider("Defect Layer to Highlight", 1, num_layers, 2) - 1
-
+    
     def draw_nmted_visualization(layer_data, Z_fluid,
                               defect_type=None, defect_layer=None):
         """
@@ -276,13 +277,27 @@ elif page == "Visualization":
 elif page == "About":
     st.title("ℹ️ About the NMTD Simulator")
     st.markdown("""
-The **Non-Metallic Tubular Defectoscope (NMTD)** simulator models ultrasonic evaluation
-of multilayer GRE, RTP, HDPE pipes using pad-coupled sensors and signal interpretation.
 
-It enables:
-- Thickness measurement
-- Delamination & crack detection
-- Visualization of tool deployment geometry
+The **Non-Metallic Tubular Defectoscope (NMDT)** simulator is an interactive tool for simulating and visualizing
+ultrasonic responses in **non-metallic multi-layer pipes** such as GRE, RTP, and HDPE.
 
-Technologies used: `Streamlit`, `NumPy`, `Matplotlib`, `Plotly`, `SciPy`.
+### 🎯 Purpose
+To evaluate:
+- Layer thickness
+- Delaminations
+- Cracks
+- Interface reflections
+
+### 🧪 How It Works
+- The ultrasonic sensor is deployed on a pad that contacts the inner wall.
+- A pulse travels through a small fluid gap (0.1 in) and multi-layered pipe.
+- Each interface reflects a portion of the wave.
+- Time delay (TT) and amplitude help detect defects.
+
+### 🧰 Technologies Used
+- `Streamlit` for web interface
+- `NumPy`, `SciPy` for signal simulation
+- `Plotly` and `Matplotlib` for visualization
+
+To customize or deploy this tool, contact your developer or AI support engineer.
 """)
