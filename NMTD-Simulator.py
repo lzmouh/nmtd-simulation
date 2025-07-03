@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from scipy.fft import fft, fftfreq
+from matplotlib.patches import Arc
 
 # Constants
 INCH_TO_METER = 0.0254
@@ -153,7 +154,7 @@ elif page == "Visualization":
         x2 = (tool_radius + arm_len) * np.cos(rad)
         y2 = pipe_length/2 + (tool_radius + arm_len) * np.sin(rad)
         ax.plot([x1, x2], [y1, y2], color='red', lw=2)
-        ax.add_patch(plt.Arc((x2, y2), width=pad_len, height=pad_len, theta1=0, theta2=180, color='red'))
+        ax.add_patch(Arc((x2, y2), width=pad_len, height=pad_len, theta1=0, theta2=180, color='red'))
 
     ax.set_aspect('equal')
     ax.set_xlim(-2, 2)
