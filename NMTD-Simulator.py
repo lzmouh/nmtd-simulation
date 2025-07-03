@@ -132,12 +132,22 @@ elif page == "Plots":
         signal += 0.01 * np.random.randn(len(signal))
         return t_axis, signal, times, amps, TT_fluid
 
-    if st.button("▶️ Run Simulation"):
-        v_nominal = 2000
-        t_p, s_p, e_p, a_p, TT_p = simulate(layer_data, v_nominal)
-        t_d, s_d, e_d, a_d, TT_d = simulate(layer_data, v_nominal,
-                                            defect_type if defect_type != "None" else None,
-                                            defect_layer - 1)
+        if st.button("▶️ Run Simulation"):
+        if not layer_data or not isinstance(layer_data[0], tuple) or len(layer_data[0]) != 3:
+            st.error("Layer data is not defined properly. Please run the Simulator tab first.")
+        else:
+            v_nominal = 2000
+            t_p, s_p, e_p, a_p, TT_p = simulate(layer_data, v_nominal)
+    
+            # Adjust for 0-based indexing safely
+            sim_defect_layer = defect_layer - 1 if defect_type != "None" else None
+    
+            t_d, s_d, e_d, a_d, TT_d = simulate(
+                layer_data,
+                v_nominal,
+                defect_type if defect_type != "None" else None,
+                sim_defect_layer
+            )
 
         fig = go.Figure()
         if show_perfect and superpose:
