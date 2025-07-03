@@ -54,7 +54,9 @@ if page == "Simulator":
 
     st.subheader("📌 Defect Settings")
     defect_type = st.selectbox("Defect Type", ["None", "Delamination", "Crack"])
+    st.session_state["defect_type"] = defect_type
     defect_layer = st.slider("Defect Layer Index", 1, num_layers, 2)
+    st.session_state["defect_layer"] = defect_layer
 
 
 # -------------------- PLOTS --------------------
@@ -63,6 +65,9 @@ elif page == "Plots":
     
     layer_data = st.session_state.get("layer_data", [])
     Z_fluid = st.session_state.get("Z_fluid", 1.48)
+    defect_type = st.session_get["defect_type"]
+    defect_layer = st.session_get["defect_layer"]
+    
     st.subheader("📈 Display Options")
     show_perfect = st.checkbox("Show Perfect Pipe", True)
     superpose = st.checkbox("Superpose Perfect and Defect", True)
