@@ -21,7 +21,7 @@ fluid_impedance_db = {
 # App config
 st.set_page_config(page_title="NMTD Simulator", layout="wide")
 st.sidebar.title("📁 Menu")
-page = st.sidebar.radio("Navigation", ["Simulator", "Visualization", "About"])
+page = st.sidebar.radio("Navigation", ["Simulator", "Plots", "Visualization", "About"])
 
 if "layer_data" not in st.session_state:
     st.session_state["layer_data"] = []
@@ -55,6 +55,11 @@ if page == "Simulator":
     st.subheader("📌 Defect Settings")
     defect_type = st.selectbox("Defect Type", ["None", "Delamination", "Crack"])
     defect_layer = st.slider("Defect Layer Index", 1, num_layers, 2)
+
+
+# -------------------- PLOTS --------------------
+elif page == "Plots":
+    st.title("📊 Simulation Results")
 
     st.subheader("📈 Display Options")
     show_perfect = st.checkbox("Show Perfect Pipe", True)
