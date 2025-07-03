@@ -60,7 +60,9 @@ if page == "Simulator":
 # -------------------- PLOTS --------------------
 elif page == "Plots":
     st.title("📊 Simulation Results")
-
+    
+    layer_data = st.session_state.get("layer_data", [])
+    Z_fluid = st.session_state.get("Z_fluid", 1.48)
     st.subheader("📈 Display Options")
     show_perfect = st.checkbox("Show Perfect Pipe", True)
     superpose = st.checkbox("Superpose Perfect and Defect", True)
