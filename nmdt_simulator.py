@@ -17,14 +17,12 @@ fluid_impedance_db = {
     "Other": None
 }
 
-# --- CONFIGURE PAGE ---
-st.set_page_config(page_title="NMDT Simulator", layout="wide")
+st.set_page_config(page_title="NMTD Simulator", layout="wide")
 st.sidebar.title("📁 Menu")
 page = st.sidebar.radio("Navigation", ["Simulator", "Visualization", "About"])
 
-# --- SIMULATOR PAGE ---
 if page == "Simulator":
-    st.title("🔍 NMDT Ultrasonic Response Simulator")
+    st.title("🔍 NMTD Ultrasonic Response Simulator")
     col1, col2 = st.columns(2)
 
     with col1:
@@ -101,23 +99,16 @@ if page == "Simulator":
         freqs = fftfreq(len(t_d), 1e-6)
         fft_d = np.abs(fft(s_d))
         fft_p = np.abs(fft(s_p)) if show_perfect and superpose else None
-        threshold = 0.01 * np.max(fft_d)
-        valid = fft_d > threshold
-        freqs = freqs[:len(freqs)//2][valid[:len(freqs)//2]]
-        fft_d = fft_d[:len(freqs)][valid[:len(freqs)]]
-        fft_p = fft_p[:len(freqs)][valid[:len(freqs)]] if fft_p is not None else None
-
         fig2 = go.Figure()
+        fig2.add_trace(go.Scatter(x=freqs[:len(freqs)//2], y=fft_d[:len(freqs)//2], name="Defective Pipe", line=dict(color='red')))
         if fft_p is not None:
-            fig2.add_trace(go.Scatter(x=freqs, y=fft_p, name="Perfect Pipe", line=dict(dash='dash')))
-        fig2.add_trace(go.Scatter(x=freqs, y=fft_d, name="Defective Pipe", line=dict(color='red')))
-        fig2.update_layout(title="🔵 Frequency Domain", xaxis_title="Frequency (Hz)", yaxis_title="Magnitude",
-                           xaxis_range=[1e5, 2e6])
+            fig2.add_trace(go.Scatter(x=freqs[:len(freqs)//2], y=fft_p[:len(freqs)//2], name="Perfect Pipe", line=dict(dash='dash')))
+        fig2.update_layout(title="🔵 Frequency Domain (Autoscaled)",
+                           xaxis_title="Frequency (Hz)", yaxis_title="Magnitude")
         st.plotly_chart(fig2, use_container_width=True)
 
         st.success(f"Simulation complete. TT_fluid = {TT_d:.2f} µs")
 
-# --- VISUALIZATION PAGE ---
 elif page == "Visualization":
     st.title("📐 Tool and Pipe Visualization")
 
@@ -127,13 +118,13 @@ elif page == "Visualization":
     tool_radius = 0.5
     arm_len = 1.0
     pad_len = 0.2
-    layer_thickness = pipe_radius / len(layer_data)
+    num_layers = len(layer_data)
+    layer_thickness = pipe_radius / max(num_layers, 1)  # Avoid division by zero
     cmap = plt.get_cmap("tab20")
 
     # Pipe layers
     for i, (_, _, _) in enumerate(layer_data):
         r1 = pipe_radius - i*layer_thickness
-        r2 = pipe_radius - (i+1)*layer_thickness
         circle = plt.Circle((0, pipe_length/2), r1, fill=True, color=cmap(i), ec='black', lw=0.5)
         ax.add_patch(circle)
 
@@ -157,30 +148,21 @@ elif page == "Visualization":
     ax.set_title("Tool Inside Non-Metallic Pipe")
     st.pyplot(fig)
 
-# --- ABOUT PAGE ---
 elif page == "About":
-    st.title("ℹ️ About the NMDT Simulator")
+    st.title("ℹ️ About the NMTD Simulator")
     st.markdown("""
-The **Non-Metallic Tubular Defectoscope (NMDT)** simulator is an interactive tool for simulating and visualizing
-ultrasonic responses in **non-metallic multi-layer pipes** such as GRE, RTP, and HDPE.
+The **Non-Metallic Tubular Defectoscope (NMTD)** simulator is an interactive tool to study
+ultrasonic signal behavior in **multi-layer non-metallic pipes** like GRE, RTP, and HDPE.
 
-### 🎯 Purpose
-To evaluate:
-- Layer thickness
-- Delaminations
-- Cracks
-- Interface reflections
+### 🔧 Purpose
+- Measure layer thickness
+- Detect delaminations and cracks
+- Visualize internal tool-pipe interaction
 
-### 🧪 How It Works
-- The ultrasonic sensor is deployed on a pad that contacts the inner wall.
-- A pulse travels through a small fluid gap (0.1 in) and multi-layered pipe.
-- Each interface reflects a portion of the wave.
-- Time delay (TT) and amplitude help detect defects.
+### ⚙️ How It Works
+- An ultrasonic pulse travels through a 0.1 in fluid gap and multiple non-metallic layers
+- Reflections at interfaces are simulated
+- Time-domain and frequency-domain responses are analyzed
 
-### 🧰 Technologies Used
-- `Streamlit` for web interface
-- `NumPy`, `SciPy` for signal simulation
-- `Plotly` and `Matplotlib` for visualization
-
-To customize or deploy this tool, contact your developer or AI support engineer.
+Built using `Streamlit`, `NumPy`, `SciPy`, `Plotly`, and `Matplotlib`.
 """)
