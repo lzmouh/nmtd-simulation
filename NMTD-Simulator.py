@@ -40,31 +40,57 @@ if page == "Simulator":
             Z_fluid = fluid_density * 1.48
         else:
             Z_fluid = fluid_impedance_db[fluid]
-        st.session_state["Z_fluid"] = Z_fluid
+        #st.session_state["Z_fluid"] = Z_fluid
         st.write(f"**Z_fluid** = {Z_fluid:.2f} MRayl")
 
     with col2:
         num_layers = st.slider("Number of Layers", 1, 10, 5)
 
-    with col1:
-        layer_data = []
-        for i in range(num_layers):
+    # Use columns to align thickness and impedance inputs
+    layer_data = []
+    st.markdown("### 🛠️ Layer Configuration")
+    for i in range(num_layers):
+        c1, c2 = st.columns(2)
+        with c1:
             t = st.number_input(f"Layer {i+1} Thickness (in)", value=0.2, key=f"t{i}")
-            layer_data.append((f"Layer {i+1}", t))
-        st.session_state["layer_data"] = layer_data
-        
-    with col2:
-        for i in range(num_layers):
+        with c2:
             z = st.number_input(f"Layer {i+1} Impedance (MRayl)", value=2.5, key=f"z{i}")
-            layer_data.append((f"Layer {i+1}", z))
-        st.session_state["layer_data"] = layer_data
+        layer_data.append((f"Layer {i+1}", t, z))
 
-    
+    pipe_thickness = sum([t for _, t, _ in layer_data])
+    #st.session_state["layer_data"] = layer_data
+
+    with col2:
+        st.write(f"**Total Pipe Thickness** = {pipe_thickness:.2f} inches")
+
     st.subheader("📌 Defect Settings")
     defect_type = st.selectbox("Defect Type", ["None", "Delamination", "Crack"])
-    st.session_state["defect_type"] = defect_type
+    #st.session_state["defect_type"] = defect_type
     defect_layer = st.slider("Defect Layer Index", 1, num_layers, 2)
-    st.session_state["defect_layer"] = defect_layer
+    #st.session_state["defect_layer"] = defect_layer
+
+# --- Save & Clear Buttons ---
+
+col_save, col_clear = st.columns([1, 1])
+
+with col_save:
+    if st.button("💾 Save"):
+        st.session_state["saved_config"] = {
+            "layer_data": layer_data,
+            "Z_fluid": Z_fluid,
+            "defect_type": defect_type,
+            "defect_layer": defect_layer
+        }
+        st.success("Configuration saved!")
+
+with col_clear:
+    if st.button("🗑️ Clear"):
+        for key in list(st.session_state.keys()):
+            if key.startswith("t") or key.startswith("z") or key in [
+                "layer_data", "Z_fluid", "defect_type", "defect_layer"
+            ]:
+                del st.session_state[key]
+        st.experimental_rerun()
 
 
 # -------------------- PLOTS --------------------
