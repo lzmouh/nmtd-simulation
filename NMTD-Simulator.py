@@ -69,30 +69,29 @@ if page == "Simulator":
     defect_layer = st.slider("Defect Layer Index", 1, num_layers, 2)
     #st.session_state["defect_layer"] = defect_layer
 
-# --- Save & Clear Buttons ---
-
-col_save, col_clear = st.columns([1, 1])
-
-with col_save:
-    if st.button("💾 Save"):
-        st.session_state["saved_config"] = {
-            "layer_data": layer_data,
-            "Z_fluid": Z_fluid,
-            "defect_type": defect_type,
-            "defect_layer": defect_layer
-        }
-        st.success("Configuration saved!")
-
-with col_clear:
-    if st.button("🗑️ Clear"):
-        for key in list(st.session_state.keys()):
-            if key.startswith("t") or key.startswith("z") or key in [
-                "layer_data", "Z_fluid", "defect_type", "defect_layer"
-            ]:
-                del st.session_state[key]
-        st.experimental_rerun()
-
-
+    # --- Save & Clear Buttons ---
+    
+    col_save, col_clear = st.columns([1, 1])
+    
+    with col_save:
+        if st.button("💾 Save"):
+            st.session_state["saved_config"] = {
+                "layer_data": layer_data,
+                "Z_fluid": Z_fluid,
+                "defect_type": defect_type,
+                "defect_layer": defect_layer
+            }
+            st.success("Configuration saved!")
+    
+    with col_clear:
+        if st.button("🗑️ Clear"):
+            for key in list(st.session_state.keys()):
+                if key.startswith("t") or key.startswith("z") or key in [
+                    "layer_data", "Z_fluid", "defect_type", "defect_layer"
+                ]:
+                    del st.session_state[key]
+            st.experimental_rerun()
+    
 # -------------------- PLOTS --------------------
 elif page == "Plots":
     st.title("📊 Simulation Results")
