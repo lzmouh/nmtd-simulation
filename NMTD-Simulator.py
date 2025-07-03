@@ -45,13 +45,21 @@ if page == "Simulator":
 
     with col2:
         num_layers = st.slider("Number of Layers", 1, 10, 5)
+
+    with col1:
         layer_data = []
         for i in range(num_layers):
             t = st.number_input(f"Layer {i+1} Thickness (in)", value=0.2, key=f"t{i}")
+            layer_data.append((f"Layer {i+1}", t))
+        st.session_state["layer_data"] = layer_data
+        
+    with col2:
+        for i in range(num_layers):
             z = st.number_input(f"Layer {i+1} Impedance (MRayl)", value=2.5, key=f"z{i}")
-            layer_data.append((f"Layer {i+1}", t, z))
+            layer_data.append((f"Layer {i+1}", z))
         st.session_state["layer_data"] = layer_data
 
+    
     st.subheader("📌 Defect Settings")
     defect_type = st.selectbox("Defect Type", ["None", "Delamination", "Crack"])
     st.session_state["defect_type"] = defect_type
