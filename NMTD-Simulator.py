@@ -2,15 +2,13 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+from matplotlib.patches import Arc, Rectangle, Circle
 from scipy.fft import fft, fftfreq
-from matplotlib.patches import Arc
 
-# Constants
 INCH_TO_METER = 0.0254
 DEFAULT_GAP_INCH = 0.1
-C_WATER = 1480  # m/s (assumed similar across fluids)
+C_WATER = 1480  # m/s
 
-# Fluid acoustic impedance database
 fluid_impedance_db = {
     "Water": 1.48,
     "Oil": 1.20,
@@ -20,18 +18,17 @@ fluid_impedance_db = {
     "Other": None
 }
 
-# Streamlit setup
+# App config
 st.set_page_config(page_title="NMTD Simulator", layout="wide")
 st.sidebar.title("📁 Menu")
 page = st.sidebar.radio("Navigation", ["Simulator", "Visualization", "About"])
 
-# Shared session memory
 if "layer_data" not in st.session_state:
     st.session_state["layer_data"] = []
 if "Z_fluid" not in st.session_state:
-    st.session_state["Z_fluid"] = 1.48  # default to water
+    st.session_state["Z_fluid"] = 1.48
 
-# SIMULATOR PAGE
+# -------------------- SIMULATOR --------------------
 if page == "Simulator":
     st.title("🔍 NMTD Ultrasonic Response Simulator")
 
@@ -90,13 +87,11 @@ if page == "Simulator":
 
     if st.button("▶️ Run Simulation"):
         v_nominal = 2000
-        layer_data = st.session_state["layer_data"]
         t_p, s_p, e_p, a_p, TT_p = simulate(layer_data, v_nominal)
         t_d, s_d, e_d, a_d, TT_d = simulate(layer_data, v_nominal,
                                             defect_type if defect_type != "None" else None,
                                             defect_layer - 1)
 
-        # Time Domain Plot
         fig = go.Figure()
         if show_perfect and superpose:
             fig.add_trace(go.Scatter(x=t_p, y=s_p, name="Perfect Pipe", line=dict(dash='dash', color='green')))
@@ -109,7 +104,6 @@ if page == "Simulator":
                           yaxis_title="Amplitude", hovermode="x unified")
         st.plotly_chart(fig, use_container_width=True)
 
-        # Frequency Domain Plot
         freqs = fftfreq(len(t_d), 1e-6)
         fft_d = np.abs(fft(s_d))
         fft_p = np.abs(fft(s_p)) if show_perfect and superpose else None
@@ -123,62 +117,101 @@ if page == "Simulator":
 
         st.success(f"Simulation complete. TT_fluid = {TT_d:.2f} µs")
 
-# VISUALIZATION TAB
+# -------------------- VISUALIZATION --------------------
 elif page == "Visualization":
     st.title("📐 Tool and Pipe Visualization")
 
     layer_data = st.session_state.get("layer_data", [])
     Z_fluid = st.session_state.get("Z_fluid", 1.48)
     num_layers = len(layer_data)
+    defect_type = st.selectbox("Visualize Defect", ["None", "Delamination", "Crack"])
+    defect_layer = st.slider("Defect Layer to Highlight", 1, num_layers, 2) - 1
 
-    fig, ax = plt.subplots(figsize=(6, 8))
-    pipe_radius = 1.5
-    pipe_length = 6
-    tool_radius = 0.5
-    arm_len = 1.0
-    pad_len = 0.2
-    layer_thickness = pipe_radius / max(num_layers, 1)
-    cmap = plt.get_cmap("tab20")
+    def draw_nmted_visualization(layer_data, Z_fluid, defect_type, defect_layer):
+        cmap = plt.get_cmap("tab20")
+        pipe_thickness = sum([t for _, t, _ in layer_data])
+        fluid_gap = 0.1
+        tool_diameter = 3
+        pipe_id = 6
+        pipe_od = pipe_id + 2 * pipe_thickness
 
-    for i, (_, _, _) in enumerate(layer_data):
-        r1 = pipe_radius - i*layer_thickness
-        circle = plt.Circle((0, pipe_length/2), r1, fill=True, color=cmap(i), ec='black', lw=0.5)
-        ax.add_patch(circle)
+        fig = plt.figure(figsize=(10, 10))
+        gs = fig.add_gridspec(2, 1, height_ratios=[2, 3])
+        ax1 = fig.add_subplot(gs[0])
 
-    ax.add_patch(plt.Circle((0, pipe_length/2), tool_radius, color='gray'))
+        # Vertical cross-section
+        x0 = 0.1
+        y = 0.1
+        width = 0.8
+        height_unit = 1.0
 
-    for angle in [0, 90, 180, 270]:
-        rad = np.radians(angle)
-        x1 = tool_radius * np.cos(rad)
-        y1 = pipe_length/2 + tool_radius * np.sin(rad)
-        x2 = (tool_radius + arm_len) * np.cos(rad)
-        y2 = pipe_length/2 + (tool_radius + arm_len) * np.sin(rad)
-        ax.plot([x1, x2], [y1, y2], color='red', lw=2)
-        ax.add_patch(Arc((x2, y2), width=pad_len, height=pad_len, theta1=0, theta2=180, color='red'))
+        ax1.add_patch(Rectangle((x0, y), width, height_unit, color='gray'))
+        ax1.text(x0 + width/2, y + height_unit/2, "Sensor", ha='center', va='center', color='white')
+        y += height_unit
 
-    ax.set_aspect('equal')
-    ax.set_xlim(-2, 2)
-    ax.set_ylim(0, pipe_length)
-    ax.axis('off')
-    ax.set_title("Tool Inside Non-Metallic Pipe")
+        ax1.add_patch(Rectangle((x0, y), width, fluid_gap*4, color='skyblue'))
+        ax1.text(x0 + width/2, y + (fluid_gap*2), f"Fluid\nZ={Z_fluid:.2f}", ha='center', va='center')
+        y += fluid_gap*4
+
+        for i, (label, thickness, Z) in enumerate(layer_data):
+            height = thickness * 4
+            color = cmap(i)
+            ax1.add_patch(Rectangle((x0, y), width, height, color=color, ec='black'))
+            ax1.text(x0 + width/2, y + height/2, f"{label}\nZ={Z:.2f}\n{thickness:.2f} in", ha='center', va='center')
+            if defect_type != "None" and (i == defect_layer):
+                ax1.plot([x0, x0 + width], [y + height / 2]*2, 'r--')
+                ax1.text(x0 + width + 0.05, y + height / 2, f"⛔ {defect_type}", color='red', fontsize=9)
+            y += height
+
+        ax1.set_xlim(0, 1.5)
+        ax1.set_ylim(0, y + 1)
+        ax1.axis('off')
+        ax1.set_title("Vertical Cross-Section")
+
+        # Top view
+        ax2 = fig.add_subplot(gs[1])
+        pipe_radius = pipe_id / 2
+        tool_radius = tool_diameter / 2
+        radius = pipe_radius
+        for i, (label, thickness, Z) in enumerate(layer_data[::-1]):
+            r = radius + thickness
+            ax2.add_patch(Circle((0, 0), r, color=cmap(len(layer_data)-1 - i), ec='black'))
+            radius = r
+        ax2.add_patch(Circle((0, 0), pipe_radius, color='skyblue', ec='black'))
+        ax2.add_patch(Circle((0, 0), tool_radius, color='gray'))
+
+        for angle in [0, 90, 180, 270]:
+            rad = np.radians(angle)
+            x0 = tool_radius * np.cos(rad)
+            y0 = tool_radius * np.sin(rad)
+            x1 = pipe_radius * np.cos(rad)
+            y1 = pipe_radius * np.sin(rad)
+            ax2.plot([x0, x1], [y0, y1], color='red', lw=4)
+            arc = Arc((0, 0), 2*pipe_radius, 2*pipe_radius, angle=0,
+                      theta1=angle-22.5, theta2=angle+22.5, color='red', lw=6)
+            ax2.add_patch(arc)
+
+        ax2.set_aspect('equal')
+        ax2.set_xlim(-radius-1, radius+1)
+        ax2.set_ylim(-radius-1, radius+1)
+        ax2.axis('off')
+        ax2.set_title("Top View: Tool in Pipe")
+        return fig
+
+    fig = draw_nmted_visualization(layer_data, Z_fluid, defect_type, defect_layer)
     st.pyplot(fig)
 
-# ABOUT PAGE
+# -------------------- ABOUT --------------------
 elif page == "About":
     st.title("ℹ️ About the NMTD Simulator")
     st.markdown("""
-The **Non-Metallic Tubular Defectoscope (NMTD)** simulator is an interactive tool to study
-ultrasonic signal behavior in **multi-layer non-metallic pipes** like GRE, RTP, and HDPE.
+The **Non-Metallic Tubular Defectoscope (NMTD)** simulator models ultrasonic evaluation
+of multilayer GRE, RTP, HDPE pipes using pad-coupled sensors and signal interpretation.
 
-### 🔧 Purpose
-- Measure layer thickness
-- Detect delaminations and cracks
-- Visualize internal tool-pipe interaction
+It enables:
+- Thickness measurement
+- Delamination & crack detection
+- Visualization of tool deployment geometry
 
-### ⚙️ How It Works
-- An ultrasonic pulse travels through a 0.1 in fluid gap and multiple non-metallic layers
-- Reflections at interfaces are simulated
-- Time-domain and frequency-domain responses are analyzed
-
-Built using `Streamlit`, `NumPy`, `SciPy`, `Plotly`, and `Matplotlib`.
+Technologies used: `Streamlit`, `NumPy`, `Matplotlib`, `Plotly`, `SciPy`.
 """)
