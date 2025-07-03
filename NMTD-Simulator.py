@@ -62,13 +62,20 @@ if page == "Simulator":
         st.write(f"**Total Pipe Thickness** = {pipe_thickness:.2f} inches")
 
     st.subheader("📌 Defect Settings")
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        defect_type = st.selectbox("Defect Type", ["None", "Delamination", "Crack"])
+        
+    with col2:
+        defect_layer = st.slider("Defect Layer Index", 1, num_layers, 2)
 
+    
     # --- Save & Clear Buttons ---
     
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        defect_type = st.selectbox("Defect Type", ["None", "Delamination", "Crack"])
         if st.button("💾 Save"):
             st.session_state["saved_config"] = {
                 "layer_data": layer_data,
@@ -79,7 +86,6 @@ if page == "Simulator":
             st.success("Configuration saved!")
     
     with col2:
-        defect_layer = st.slider("Defect Layer Index", 1, num_layers, 2)
         if st.button("🗑️ Clear"):
             for key in list(st.session_state.keys()):
                 if key.startswith("t") or key.startswith("z") or key in [
