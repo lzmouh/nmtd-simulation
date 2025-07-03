@@ -132,7 +132,7 @@ elif page == "Plots":
         return t_axis, signal, times, amps, TT_fluid
 
         if st.button("▶️ Run Simulation"):
-        if not layer_data or not isinstance(layer_data[0], tuple) or len(layer_data[0]) != 3:
+            if not layer_data or not isinstance(layer_data[0], tuple) or len(layer_data[0]) != 3:
             st.error("Layer data is not defined properly. Please run the Simulator tab first.")
         else:
             v_nominal = 2000
