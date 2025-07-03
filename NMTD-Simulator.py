@@ -127,7 +127,7 @@ elif page == "Visualization":
     defect_type = st.selectbox("Visualize Defect", ["None", "Delamination", "Crack"])
     defect_layer = st.slider("Defect Layer to Highlight", 1, num_layers, 2) - 1
 
-    def draw_nmted_schematics(layer_data, Z_fluid,
+    def draw_nmted_visualization(layer_data, Z_fluid,
                               defect_type=None, defect_layer=None):
         """
         layer_data: list of tuples (label, thickness_in_inches, impedance)
