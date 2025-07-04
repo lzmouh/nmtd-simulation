@@ -6,9 +6,10 @@ from matplotlib.patches import Arc, Rectangle, Circle
 from scipy.fft import fft, fftfreq
 import json
 
-# --- Constants ---
+# ---- Constants ----
 INCH_TO_METER = 0.0254
 DEFAULT_GAP_INCH = 0.1
+
 fluid_impedance_db = {
     "Water": 1.48,
     "Oil": 1.20,
@@ -18,26 +19,38 @@ fluid_impedance_db = {
     "Other": None
 }
 
-# --- Page Setup ---
+# ---- Page Config ----
 st.set_page_config(page_title="NMTD Simulator", layout="wide")
 st.sidebar.title("📁 Menu")
 page = st.sidebar.radio("Navigation", ["Simulator", "Plots", "Visualization", "About"])
 
-# -------------------- SIMULATOR --------------------
+# ---- Default Session Values ----
+if "layer_data" not in st.session_state:
+    st.session_state["layer_data"] = []
+if "Z_fluid" not in st.session_state:
+    st.session_state["Z_fluid"] = 1.48
+
+# ---------------- SIMULATOR PAGE ----------------
 if page == "Simulator":
     st.title("🔍 NMTD Ultrasonic Response Simulator")
 
-    fluid = st.selectbox("Select Borehole Fluid", list(fluid_impedance_db.keys()))
-    if fluid == "Other":
-        fluid_density = st.number_input("Fluid Density (g/cc)", 0.5, 2.5, 1.0)
-        Z_fluid = fluid_density * 1.48
-    else:
-        Z_fluid = fluid_impedance_db[fluid]
-    st.write(f"**Z_fluid** = {Z_fluid:.2f} MRayl")
+    # ---- Fluid and Layer Input ----
+    col1, col2 = st.columns(2)
+    with col1:
+        fluid = st.selectbox("Select Borehole Fluid", list(fluid_impedance_db.keys()))
+        if fluid == "Other":
+            fluid_density = st.number_input("Fluid Density (g/cc)", 0.5, 2.5, 1.0)
+            Z_fluid = fluid_density * 1.48
+        else:
+            Z_fluid = fluid_impedance_db[fluid]
+        st.session_state["Z_fluid"] = Z_fluid
+        st.write(f"**Z_fluid** = {Z_fluid:.2f} MRayl")
 
-    num_layers = st.slider("Number of Layers", 1, 10, 5)
+    with col2:
+        num_layers = st.slider("Number of Layers", 1, 10, 5)
 
-    st.markdown("### 📦 Layers Configuration")
+    # ---- Layer Data Inputs ----
+    st.markdown("### 📦 Layer Configuration")
     layer_data = []
     for i in range(num_layers):
         c1, c2 = st.columns(2)
@@ -47,57 +60,66 @@ if page == "Simulator":
             z = st.number_input(f"Layer {i+1} Impedance (MRayl)", 1.0, 5.0, 2.5, key=f"z{i}")
         layer_data.append((f"Layer {i+1}", t, z))
 
-    pipe_thickness = sum([t for _, t, _ in layer_data])
-    st.write(f"**Total Pipe Thickness** = {pipe_thickness:.2f} inches")
+    st.session_state["layer_data"] = layer_data
+    total_thickness = sum([t for _, t, _ in layer_data])
+    st.write(f"**Total Pipe Thickness** = {total_thickness:.2f} inches")
 
+    # ---- Defect Settings ----
     st.subheader("📌 Defect Settings")
-    defect_type = st.selectbox("Defect Type", ["None", "Delamination", "Crack"])
-    defect_layer = st.slider("Defect Layer Index", 1, num_layers, 2)
+    c1, c2 = st.columns(2)
+    with c1:
+        defect_type = st.selectbox("Defect Type", ["None", "Delamination", "Crack"])
+    with c2:
+        defect_layer = st.slider("Defect Layer Index", 1, num_layers, 2)
 
-    # Save config in session state
-    st.session_state.update({
-        "layer_data": layer_data,
-        "Z_fluid": Z_fluid,
-        "defect_type": defect_type,
-        "defect_layer": defect_layer
-    })
+    st.session_state["defect_type"] = defect_type
+    st.session_state["defect_layer"] = defect_layer
 
-    # --- Buttons ---
-    st.markdown("### 💾 Save, Load & Export Configuration")
+    # ---- Save / Export / Clear ----
+    st.markdown("### 💾 Save & Load Configuration")
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        if st.button("💾 Save"):
-            st.session_state["saved_config"] = st.session_state.copy()
-            st.success("Configuration saved!")
+        if st.button("💾 Save Current Config"):
+            st.session_state["saved_config"] = {
+                "layer_data": layer_data,
+                "Z_fluid": Z_fluid,
+                "defect_type": defect_type,
+                "defect_layer": defect_layer
+            }
+            st.success("Configuration saved to memory!")
 
     with col2:
         uploaded = st.file_uploader("⬆️ Load Config (.json)", type="json")
         if uploaded:
-            data = json.load(uploaded)
-            for k, v in data.items():
+            config = json.load(uploaded)
+            for k, v in config.items():
                 st.session_state[k] = v
+            st.success("Configuration loaded. Please switch tabs to view.")
             st.rerun()
 
     with col3:
-        if st.button("🗑️ Clear All"):
+        if st.button("🗑️ Clear All Inputs"):
             for k in list(st.session_state.keys()):
                 if k.startswith("t") or k.startswith("z") or k in [
-                    "layer_data", "Z_fluid", "defect_type", "defect_layer"
+                    "layer_data", "Z_fluid", "defect_type", "defect_layer", "saved_config"
                 ]:
                     del st.session_state[k]
+            st.success("Inputs cleared.")
             st.rerun()
 
-    st.download_button("📤 Export Configuration", 
-        data=json.dumps({
-            "layer_data": layer_data,
-            "Z_fluid": Z_fluid,
-            "defect_type": defect_type,
-            "defect_layer": defect_layer
-        }, indent=2),
-        file_name="nmted_config.json",
-        mime="application/json")
-
+    # Export button
+    config_export = {
+        "layer_data": layer_data,
+        "Z_fluid": Z_fluid,
+        "defect_type": defect_type,
+        "defect_layer": defect_layer
+    }
+    st.download_button("📤 Export Config as JSON",
+                       data=json.dumps(config_export, indent=2),
+                       file_name="nmted_config.json",
+                       mime="application/json")
+    
 # -------------------- PLOTS --------------------
 elif page == "Plots":
     st.title("📊 Simulation Results")
