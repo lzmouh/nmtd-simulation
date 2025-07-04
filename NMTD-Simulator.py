@@ -57,8 +57,7 @@ if page == "Simulator":
     with c2:
         config["num_layers"] = st.slider("Number of Layers", 1, 10, config["num_layers"])
         # --- Show total thickness below the layer count ---
-
-    st.markdown(f"**📏 Total Pipe Thickness: `{total_thickness:.2f} inches`**")
+        st.markdown(f"**📏 Total Pipe Thickness: `{total_thickness:.2f} inches`**")
 
 
     
@@ -72,7 +71,7 @@ if page == "Simulator":
             config["layer_data"][i][1] = st.number_input(f"Layer {i+1} Thickness (in)", 0.01, 1.0, config["layer_data"][i][1])
         with c2:
             config["layer_data"][i][2] = st.number_input(f"Layer {i+1} Z (MRayl)", 1.0, 5.0, config["layer_data"][i][2])
-    total_thickness = sum(layer[1] for layer in config["layer_data"])    
+        total_thickness = sum(layer[1] for layer in config["layer_data"])    
     #pipe_thickness = sum([t for _, t, _ in layer_data])
 
     st.subheader("📌 Defect Settings")
