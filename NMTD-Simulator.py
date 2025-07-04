@@ -245,7 +245,7 @@ elif page == "Visualization":
             # draw layer
             ax1.add_patch(Rectangle((cumulative_x, y), W, H, color=color, ec='black'))
             ax1.text(cumulative_x+W/2, y+H+0.05,
-                     f"{label}\nZ={Z:.2f}\n{t:.2f}\"",
+                     f"Layer {i+1}\nZ={Z:.2f}\n{t:.2f}\"",
                      ha='center', fontsize=7)
             # delamination: vertical strip at boundary before this layer
             if defect_type=="Delamination" and i==defect_layer:
