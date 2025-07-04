@@ -30,11 +30,10 @@ if "layer_data" not in st.session_state:
 if "Z_fluid" not in st.session_state:
     st.session_state["Z_fluid"] = 1.48
 
-# ---------------- SIMULATOR PAGE ----------------
+# -------------------- SIMULATOR --------------------
 if page == "Simulator":
     st.title("🔍 NMTD Ultrasonic Response Simulator")
 
-    # ---- Fluid and Layer Input ----
     col1, col2 = st.columns(2)
     with col1:
         fluid = st.selectbox("Select Borehole Fluid", list(fluid_impedance_db.keys()))
@@ -43,35 +42,35 @@ if page == "Simulator":
             Z_fluid = fluid_density * 1.48
         else:
             Z_fluid = fluid_impedance_db[fluid]
-        st.session_state["Z_fluid"] = Z_fluid
         st.write(f"**Z_fluid** = {Z_fluid:.2f} MRayl")
 
     with col2:
         num_layers = st.slider("Number of Layers", 1, 10, 5)
-        total_thickness = sum([t for _, t, _ in layer_data])
-        st.write(f"**Total Pipe Thickness** = {total_thickness:.2f} inches")
 
-
-    # ---- Layer Data Inputs ----
-    st.markdown("### 📦 Layer Configuration")
     layer_data = []
+    st.markdown("### 📦 Layers Configuration")
     for i in range(num_layers):
         c1, c2 = st.columns(2)
         with c1:
-            t = st.number_input(f"Layer {i+1} Thickness (in)", 0.01, 1.0, 0.2, key=f"t{i}")
+            t = st.number_input(f"Layer {i+1} Thickness (in)", value=0.2, key=f"t{i}")
         with c2:
-            z = st.number_input(f"Layer {i+1} Impedance (MRayl)", 1.0, 5.0, 2.5, key=f"z{i}")
+            z = st.number_input(f"Layer {i+1} Impedance (MRayl)", value=2.5, key=f"z{i}")
         layer_data.append((f"Layer {i+1}", t, z))
+    
+    pipe_thickness = sum([t for _, t, _ in layer_data])
 
-    st.session_state["layer_data"] = layer_data
+    with col2:
+        st.write(f"**Total Pipe Thickness** = {pipe_thickness:.2f} inches")
 
-    # ---- Defect Settings ----
     st.subheader("📌 Defect Settings")
-    c1, c2 = st.columns(2)
-    with c1:
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
         defect_type = st.selectbox("Defect Type", ["None", "Delamination", "Crack"])
-    with c2:
+        
+    with col2:
         defect_layer = st.slider("Defect Layer Index", 1, num_layers, 2)
+
 
     st.session_state["defect_type"] = defect_type
     st.session_state["defect_layer"] = defect_layer
