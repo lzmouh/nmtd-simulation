@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from matplotlib.patches import Arc, Rectangle, Circle
 from scipy.fft import fft, fftfreq
+import json
 
+# --- Constants ---
 INCH_TO_METER = 0.0254
 DEFAULT_GAP_INCH = 0.1
-C_WATER = 1480  # m/s
-
 fluid_impedance_db = {
     "Water": 1.48,
     "Oil": 1.20,
@@ -18,90 +18,95 @@ fluid_impedance_db = {
     "Other": None
 }
 
-# App config
+# --- Page Setup ---
 st.set_page_config(page_title="NMTD Simulator", layout="wide")
 st.sidebar.title("📁 Menu")
 page = st.sidebar.radio("Navigation", ["Simulator", "Plots", "Visualization", "About"])
-
-if "layer_data" not in st.session_state:
-    st.session_state["layer_data"] = []
-if "Z_fluid" not in st.session_state:
-    st.session_state["Z_fluid"] = 1.48
 
 # -------------------- SIMULATOR --------------------
 if page == "Simulator":
     st.title("🔍 NMTD Ultrasonic Response Simulator")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        fluid = st.selectbox("Select Borehole Fluid", list(fluid_impedance_db.keys()))
-        if fluid == "Other":
-            fluid_density = st.number_input("Fluid Density (g/cc)", 0.5, 2.5, 1.0)
-            Z_fluid = fluid_density * 1.48
-        else:
-            Z_fluid = fluid_impedance_db[fluid]
-        st.write(f"**Z_fluid** = {Z_fluid:.2f} MRayl")
+    fluid = st.selectbox("Select Borehole Fluid", list(fluid_impedance_db.keys()))
+    if fluid == "Other":
+        fluid_density = st.number_input("Fluid Density (g/cc)", 0.5, 2.5, 1.0)
+        Z_fluid = fluid_density * 1.48
+    else:
+        Z_fluid = fluid_impedance_db[fluid]
+    st.write(f"**Z_fluid** = {Z_fluid:.2f} MRayl")
 
-    with col2:
-        num_layers = st.slider("Number of Layers", 1, 10, 5)
+    num_layers = st.slider("Number of Layers", 1, 10, 5)
 
-    layer_data = []
     st.markdown("### 📦 Layers Configuration")
+    layer_data = []
     for i in range(num_layers):
         c1, c2 = st.columns(2)
         with c1:
-            t = st.number_input(f"Layer {i+1} Thickness (in)", value=0.2, key=f"t{i}")
+            t = st.number_input(f"Layer {i+1} Thickness (in)", 0.01, 1.0, 0.2, key=f"t{i}")
         with c2:
-            z = st.number_input(f"Layer {i+1} Impedance (MRayl)", value=2.5, key=f"z{i}")
+            z = st.number_input(f"Layer {i+1} Impedance (MRayl)", 1.0, 5.0, 2.5, key=f"z{i}")
         layer_data.append((f"Layer {i+1}", t, z))
-    
-    pipe_thickness = sum([t for _, t, _ in layer_data])
 
-    with col2:
-        st.write(f"**Total Pipe Thickness** = {pipe_thickness:.2f} inches")
+    pipe_thickness = sum([t for _, t, _ in layer_data])
+    st.write(f"**Total Pipe Thickness** = {pipe_thickness:.2f} inches")
 
     st.subheader("📌 Defect Settings")
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        defect_type = st.selectbox("Defect Type", ["None", "Delamination", "Crack"])
-        
-    with col2:
-        defect_layer = st.slider("Defect Layer Index", 1, num_layers, 2)
+    defect_type = st.selectbox("Defect Type", ["None", "Delamination", "Crack"])
+    defect_layer = st.slider("Defect Layer Index", 1, num_layers, 2)
 
-    
-    # --- Save & Clear Buttons ---
-    
-    col1, col2 = st.columns([1, 1])
-    
+    # Save config in session state
+    st.session_state.update({
+        "layer_data": layer_data,
+        "Z_fluid": Z_fluid,
+        "defect_type": defect_type,
+        "defect_layer": defect_layer
+    })
+
+    # --- Buttons ---
+    st.markdown("### 💾 Save, Load & Export Configuration")
+    col1, col2, col3 = st.columns(3)
+
     with col1:
         if st.button("💾 Save"):
-            st.session_state["saved_config"] = {
-                "layer_data": layer_data,
-                "Z_fluid": Z_fluid,
-                "defect_type": defect_type,
-                "defect_layer": defect_layer
-            }
+            st.session_state["saved_config"] = st.session_state.copy()
             st.success("Configuration saved!")
-    
+
     with col2:
-        if st.button("🗑️ Clear"):
-            for key in list(st.session_state.keys()):
-                if key.startswith("t") or key.startswith("z") or key in [
+        uploaded = st.file_uploader("⬆️ Load Config (.json)", type="json")
+        if uploaded:
+            data = json.load(uploaded)
+            for k, v in data.items():
+                st.session_state[k] = v
+            st.rerun()
+
+    with col3:
+        if st.button("🗑️ Clear All"):
+            for k in list(st.session_state.keys()):
+                if k.startswith("t") or k.startswith("z") or k in [
                     "layer_data", "Z_fluid", "defect_type", "defect_layer"
                 ]:
-                    del st.session_state[key]
+                    del st.session_state[k]
             st.rerun()
-    
+
+    st.download_button("📤 Export Configuration", 
+        data=json.dumps({
+            "layer_data": layer_data,
+            "Z_fluid": Z_fluid,
+            "defect_type": defect_type,
+            "defect_layer": defect_layer
+        }, indent=2),
+        file_name="nmted_config.json",
+        mime="application/json")
+
 # -------------------- PLOTS --------------------
 elif page == "Plots":
     st.title("📊 Simulation Results")
-    
+
     layer_data = st.session_state.get("layer_data", [])
     Z_fluid = st.session_state.get("Z_fluid", 1.48)
-    defect_layer = st.session_state.get("defect_layer", 1)
     defect_type = st.session_state.get("defect_type", "None")
-    
+    defect_layer = st.session_state.get("defect_layer", 1)
+
     st.subheader("📈 Display Options")
     show_perfect = st.checkbox("Show Perfect Pipe", True)
     superpose = st.checkbox("Superpose Perfect and Defect", True)
@@ -131,48 +136,43 @@ elif page == "Plots":
         signal += 0.01 * np.random.randn(len(signal))
         return t_axis, signal, times, amps, TT_fluid
 
-        if st.button("▶️ Run Simulation"):
-            if not layer_data or not isinstance(layer_data[0], tuple) or len(layer_data[0]) != 3:
-                st.error("Layer data is not defined properly. Please run the Simulator tab first.")
+    if st.button("▶️ Run Simulation"):
+        if not layer_data or not isinstance(layer_data[0], tuple) or len(layer_data[0]) != 3:
+            st.error("Invalid configuration. Please run the Simulator tab first.")
         else:
             v_nominal = 2000
-            t_p, s_p, e_p, a_p, TT_p = simulate(layer_data, v_nominal)
-    
-            # Adjust for 0-based indexing safely
             sim_defect_layer = defect_layer - 1 if defect_type != "None" else None
-    
-            t_d, s_d, e_d, a_d, TT_d = simulate(
-                layer_data,
-                v_nominal,
-                defect_type if defect_type != "None" else None,
-                sim_defect_layer
-            )
+            t_p, s_p, e_p, a_p, TT_p = simulate(layer_data, v_nominal)
+            t_d, s_d, e_d, a_d, TT_d = simulate(layer_data, v_nominal,
+                                                defect_type if defect_type != "None" else None,
+                                                sim_defect_layer)
 
-        fig = go.Figure()
-        if show_perfect and superpose:
-            fig.add_trace(go.Scatter(x=t_p, y=s_p, name="Perfect Pipe", line=dict(dash='dash', color='green')))
-        fig.add_trace(go.Scatter(x=t_d, y=s_d, name="Defective Pipe", line=dict(color='red')))
-        for t, a in zip(e_d, a_d):
-            fig.add_vline(x=t, line_dash="dot", line_color="gray")
-        fig.add_vline(x=TT_d, line_dash="dash", line_color="blue",
-                      annotation_text=f"TT_fluid={TT_d:.2f} µs")
-        fig.update_layout(title="🟢 A-Scan (Time Domain)", xaxis_title="Time (µs)",
-                          yaxis_title="Amplitude", hovermode="x unified")
-        st.plotly_chart(fig, use_container_width=True)
+            # Plot Time Domain
+            fig = go.Figure()
+            if show_perfect and superpose:
+                fig.add_trace(go.Scatter(x=t_p, y=s_p, name="Perfect Pipe", line=dict(dash='dash', color='green')))
+            fig.add_trace(go.Scatter(x=t_d, y=s_d, name="Defective Pipe", line=dict(color='red')))
+            for t in e_d:
+                fig.add_vline(x=t, line_dash="dot", line_color="gray")
+            fig.add_vline(x=TT_d, line_dash="dash", line_color="blue",
+                          annotation_text=f"TT_fluid={TT_d:.2f} µs")
+            fig.update_layout(title="🟢 A-Scan (Time Domain)", xaxis_title="Time (µs)",
+                              yaxis_title="Amplitude", hovermode="x unified")
+            st.plotly_chart(fig, use_container_width=True)
 
-        freqs = fftfreq(len(t_d), 1e-6)
-        fft_d = np.abs(fft(s_d))
-        fft_p = np.abs(fft(s_p)) if show_perfect and superpose else None
-        fig2 = go.Figure()
-        fig2.add_trace(go.Scatter(x=freqs[:len(freqs)//2], y=fft_d[:len(freqs)//2], name="Defective Pipe", line=dict(color='red')))
-        if fft_p is not None:
-            fig2.add_trace(go.Scatter(x=freqs[:len(freqs)//2], y=fft_p[:len(freqs)//2], name="Perfect Pipe", line=dict(dash='dash')))
-        fig2.update_layout(title="🔵 Frequency Domain (Autoscaled)",
-                           xaxis_title="Frequency (Hz)", yaxis_title="Magnitude")
-        st.plotly_chart(fig2, use_container_width=True)
+            # Frequency Domain
+            freqs = fftfreq(len(t_d), 1e-6)
+            fft_d = np.abs(fft(s_d))
+            fft_p = np.abs(fft(s_p)) if show_perfect and superpose else None
+            fig2 = go.Figure()
+            fig2.add_trace(go.Scatter(x=freqs[:len(freqs)//2], y=fft_d[:len(freqs)//2], name="Defective Pipe", line=dict(color='red')))
+            if fft_p is not None:
+                fig2.add_trace(go.Scatter(x=freqs[:len(freqs)//2], y=fft_p[:len(freqs)//2], name="Perfect Pipe", line=dict(dash='dash')))
+            fig2.update_layout(title="🔵 Frequency Domain (Autoscaled)",
+                               xaxis_title="Frequency (Hz)", yaxis_title="Magnitude")
+            st.plotly_chart(fig2, use_container_width=True)
 
-        st.success(f"Simulation complete. TT_fluid = {TT_d:.2f} µs")
-
+            st.success(f"Simulation complete. TT_fluid = {TT_d:.2f} µs")
 # -------------------- VISUALIZATION --------------------
 elif page == "Visualization":
     st.title("📐 Tool and Pipe Visualization")
