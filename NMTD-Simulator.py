@@ -85,7 +85,7 @@ if page == "Simulator":
                 "defect_layer": defect_layer
             }
             st.success("Configuration saved to memory!")
-            st.write({saved_config})
+            st.json(st.session_state["saved_config"], expanded=True)
 
     with col2:
         if st.button("🗑️ Clear"):
