@@ -45,6 +45,7 @@ if page == "Simulator":
     st.title("🔍 NMTD Ultrasonic Response Simulator")
     
     #total_thickness = sum(layer[1] for layer in config["layer_data"])
+    total_thickness = sum([t for _, t, _ in layer_data])
     
     c1, c2 = st.columns(2)
     with c1:
@@ -74,7 +75,6 @@ if page == "Simulator":
         with c2:
             config["layer_data"][i][2] = st.number_input(f"Layer {i+1} Z (MRayl)", 1.0, 5.0, config["layer_data"][i][2])
             
-    total_thickness = sum([t for _, t, _ in layer_data])
 
     st.subheader("📌 Defect Settings")
     c1, c2 = st.columns(2)
