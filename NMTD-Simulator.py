@@ -85,8 +85,12 @@ if page == "Simulator":
                 "defect_layer": defect_layer
             }
             st.success("Configuration saved to memory!")
-            st.json(st.session_state["saved_config"], expanded=True)
 
+    # Display saved data below buttons
+    if "saved_config" in st.session_state:
+        st.markdown("#### 📋 Saved Configuration")
+        st.json(st.session_state["saved_config"], expanded=True)
+    
     with col2:
         if st.button("🗑️ Clear"):
             for k in list(st.session_state.keys()):
