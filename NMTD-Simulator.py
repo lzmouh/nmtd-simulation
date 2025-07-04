@@ -56,9 +56,12 @@ if page == "Simulator":
 
     with c2:
         config["num_layers"] = st.slider("Number of Layers", 1, 10, config["num_layers"])
-        pipe_thickness = sum([t for _, t, _ in layer_data])
-        st.write(f"**Total Pipe Thickness** = {pipe_thickness:.2f} inches")
-        
+        # --- Show total thickness below the layer count ---
+        total_thickness = sum(layer[1] for layer in config["layer_data"])
+        st.markdown(f"**📏 Total Pipe Thickness: `{total_thickness:.2f} inches`**")
+
+
+    
     config["layer_data"] = config["layer_data"][:config["num_layers"]]
     st.markdown("### 📦 Layers Configuration")
     for i in range(config["num_layers"]):
