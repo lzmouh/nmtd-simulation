@@ -76,20 +76,14 @@ if page == "Simulator":
     st.markdown("### 💾 Save & Load Configuration")
     col1, col2, col3, col4 = st.columns(4)
 
-    with col1:
-        if st.button("💾 Save"):
-            st.session_state["saved_config"] = {
-                "layer_data": layer_data,
-                "Z_fluid": Z_fluid,
-                "defect_type": defect_type,
-                "defect_layer": defect_layer
-            }
-            st.success("Configuration saved to memory!")
-
-    # Display saved data below buttons
-    if "saved_config" in st.session_state:
-        st.markdown("#### 📋 Saved Configuration")
-        st.json(st.session_state["saved_config"], expanded=True)
+    if st.button("💾 Save"):
+    st.session_state["saved_config"] = {
+        "layer_data": [list(item) for item in layer_data],  # convert to JSON-safe
+        "Z_fluid": Z_fluid,
+        "defect_type": defect_type,
+        "defect_layer": defect_layer
+    }
+    st.success("Configuration saved to memory!")
     
     with col2:
         if st.button("🗑️ Clear"):
