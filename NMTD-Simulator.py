@@ -48,6 +48,9 @@ if page == "Simulator":
 
     with col2:
         num_layers = st.slider("Number of Layers", 1, 10, 5)
+        total_thickness = sum([t for _, t, _ in layer_data])
+        st.write(f"**Total Pipe Thickness** = {total_thickness:.2f} inches")
+
 
     # ---- Layer Data Inputs ----
     st.markdown("### 📦 Layer Configuration")
@@ -61,8 +64,6 @@ if page == "Simulator":
         layer_data.append((f"Layer {i+1}", t, z))
 
     st.session_state["layer_data"] = layer_data
-    total_thickness = sum([t for _, t, _ in layer_data])
-    st.write(f"**Total Pipe Thickness** = {total_thickness:.2f} inches")
 
     # ---- Defect Settings ----
     st.subheader("📌 Defect Settings")
@@ -77,10 +78,10 @@ if page == "Simulator":
 
     # ---- Save / Export / Clear ----
     st.markdown("### 💾 Save & Load Configuration")
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        if st.button("💾 Save Current Config"):
+        if st.button("💾 Save"):
             st.session_state["saved_config"] = {
                 "layer_data": layer_data,
                 "Z_fluid": Z_fluid,
@@ -90,7 +91,7 @@ if page == "Simulator":
             st.success("Configuration saved to memory!")
 
     with col2:
-        uploaded = st.file_uploader("⬆️ Load Config (.json)", type="json")
+        uploaded = st.file_uploader("⬆️ Load (.json)", type="json")
         if uploaded:
             config = json.load(uploaded)
             for k, v in config.items():
@@ -99,7 +100,7 @@ if page == "Simulator":
             st.rerun()
 
     with col3:
-        if st.button("🗑️ Clear All Inputs"):
+        if st.button("🗑️ Clear"):
             for k in list(st.session_state.keys()):
                 if k.startswith("t") or k.startswith("z") or k in [
                     "layer_data", "Z_fluid", "defect_type", "defect_layer", "saved_config"
@@ -108,17 +109,18 @@ if page == "Simulator":
             st.success("Inputs cleared.")
             st.rerun()
 
-    # Export button
-    config_export = {
-        "layer_data": layer_data,
-        "Z_fluid": Z_fluid,
-        "defect_type": defect_type,
-        "defect_layer": defect_layer
-    }
-    st.download_button("📤 Export Config as JSON",
-                       data=json.dumps(config_export, indent=2),
-                       file_name="nmted_config.json",
-                       mime="application/json")
+    with col4:
+        # Export button
+        config_export = {
+            "layer_data": layer_data,
+            "Z_fluid": Z_fluid,
+            "defect_type": defect_type,
+            "defect_layer": defect_layer
+        }
+        st.download_button("📤 Export Config as JSON",
+                           data=json.dumps(config_export, indent=2),
+                           file_name="nmted_config.json",
+                           mime="application/json")
     
 # -------------------- PLOTS --------------------
 elif page == "Plots":
