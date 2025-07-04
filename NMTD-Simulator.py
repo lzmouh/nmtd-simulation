@@ -77,13 +77,13 @@ if page == "Simulator":
     col1, col2, col3, col4 = st.columns(4)
 
     if st.button("💾 Save"):
-    st.session_state["saved_config"] = {
-        "layer_data": [list(item) for item in layer_data],  # convert to JSON-safe
-        "Z_fluid": Z_fluid,
-        "defect_type": defect_type,
-        "defect_layer": defect_layer
-    }
-    st.success("Configuration saved to memory!")
+        st.session_state["saved_config"] = {
+            "layer_data": [list(item) for item in layer_data],  # convert to JSON-safe
+            "Z_fluid": Z_fluid,
+            "defect_type": defect_type,
+            "defect_layer": defect_layer
+            }
+        st.success("Configuration saved to memory!")
     
     with col2:
         if st.button("🗑️ Clear"):
@@ -97,21 +97,17 @@ if page == "Simulator":
 
     with col3:
         # Export button
-        config_export = {
-            "layer_data": layer_data,
-            "Z_fluid": Z_fluid,
-            "defect_type": defect_type,
-            "defect_layer": defect_layer
-        }
         st.download_button("📤 Export Config as JSON",
-                           data=json.dumps(config_export, indent=2),
-                           file_name="nmted_config.json",
-                           mime="application/json")
+            data=json.dumps(st.session_state["saved_config"], indent=2),
+            file_name="nmted_config.json",
+            mime="application/json")
         
     with col4:
-        uploaded = st.file_uploader("⬆️ Load (.json)", type="json")
+        uploaded = st.file_uploader("⬆️ Load Config (.json)", type="json")
         if uploaded:
             config = json.load(uploaded)
+            if "layer_data" in config:
+                config["layer_data"] = [tuple(item) for item in config["layer_data"]]
             for k, v in config.items():
                 st.session_state[k] = v
             st.success("Configuration loaded. Please switch tabs to view.")
@@ -123,10 +119,16 @@ if page == "Simulator":
 elif page == "Plots":
     st.title("📊 Simulation Results")
 
-    layer_data = st.session_state.get("layer_data", [])
-    Z_fluid = st.session_state.get("Z_fluid", 1.48)
-    defect_type = st.session_state.get("defect_type", "None")
-    defect_layer = st.session_state.get("defect_layer", 1)
+    config = st.session_state.get("saved_config")
+
+    if not config:
+        st.warning("No configuration found. Please save it from the Simulator tab.")
+        st.stop()
+
+    layer_data = config["layer_data"]
+    Z_fluid = config["Z_fluid"]
+    defect_type = config["defect_type"]
+    defect_layer = config["defect_layer"]
 
     st.subheader("📈 Display Options")
     show_perfect = st.checkbox("Show Perfect Pipe", True)
