@@ -44,8 +44,8 @@ config = st.session_state["config"]
 if page == "Simulator":
     st.title("🔍 NMTD Ultrasonic Response Simulator")
     
-    #total_thickness = sum(layer[1] for layer in config["layer_data"])
-    total_thickness = sum([t for _, t, _ in layer_data])
+    total_thickness = sum(layer[1] for layer in config["layer_data"])
+    #total_thickness = sum([t for _, t, _ in layer_data])
     
     c1, c2 = st.columns(2)
     with c1:
