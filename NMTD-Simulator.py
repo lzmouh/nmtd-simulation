@@ -72,8 +72,8 @@ if page == "Simulator":
         defect_layer = st.slider("Defect Layer Index", 1, num_layers, 2)
 
 
-    st.session_state["defect_type"] = defect_type
-    st.session_state["defect_layer"] = defect_layer
+    #st.session_state["defect_type"] = defect_type
+    #st.session_state["defect_layer"] = defect_layer
 
     # ---- Save / Export / Clear ----
     st.markdown("### 💾 Save & Load Configuration")
@@ -90,15 +90,6 @@ if page == "Simulator":
             st.success("Configuration saved to memory!")
 
     with col2:
-        uploaded = st.file_uploader("⬆️ Load (.json)", type="json")
-        if uploaded:
-            config = json.load(uploaded)
-            for k, v in config.items():
-                st.session_state[k] = v
-            st.success("Configuration loaded. Please switch tabs to view.")
-            st.rerun()
-
-    with col3:
         if st.button("🗑️ Clear"):
             for k in list(st.session_state.keys()):
                 if k.startswith("t") or k.startswith("z") or k in [
@@ -106,9 +97,9 @@ if page == "Simulator":
                 ]:
                     del st.session_state[k]
             st.success("Inputs cleared.")
-            st.rerun()
+            st.rerun()    
 
-    with col4:
+    with col3:
         # Export button
         config_export = {
             "layer_data": layer_data,
@@ -120,6 +111,17 @@ if page == "Simulator":
                            data=json.dumps(config_export, indent=2),
                            file_name="nmted_config.json",
                            mime="application/json")
+        
+    with col4:
+        uploaded = st.file_uploader("⬆️ Load (.json)", type="json")
+        if uploaded:
+            config = json.load(uploaded)
+            for k, v in config.items():
+                st.session_state[k] = v
+            st.success("Configuration loaded. Please switch tabs to view.")
+            st.rerun()
+
+
     
 # -------------------- PLOTS --------------------
 elif page == "Plots":
