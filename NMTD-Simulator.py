@@ -146,8 +146,8 @@ elif page == "Plots":
         return t_axis, signal, times, amps, TT_fluid
 
     if st.button("▶️ Run Simulation"):
-        if not layer_data or not isinstance(layer_data[0], tuple) or len(layer_data[0]) != 3:
-            st.error("Invalid configuration. Please run the Simulator tab first.")
+        if not layer_data:
+            st.error("No data! Please configure the pipe in the Simulator tab.")
         else:
             v_nominal = 2000
             sim_defect_layer = defect_layer - 1 if defect_type != "None" else None
