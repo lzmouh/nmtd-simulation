@@ -56,9 +56,9 @@ if page == "Simulator":
 
     with c2:
         config["num_layers"] = st.slider("Number of Layers", 1, 10, config["num_layers"])
-        total_thick = sum([t for _, t, _ in config["layer_data"]])
-        st.write(f"**Total Thickness** = {total_thick:.2f} in")
-
+        pipe_thickness = sum([t for _, t, _ in layer_data])
+        st.write(f"**Total Pipe Thickness** = {pipe_thickness:.2f} inches")
+        
     config["layer_data"] = config["layer_data"][:config["num_layers"]]
     st.markdown("### 📦 Layers Configuration")
     for i in range(config["num_layers"]):
@@ -69,7 +69,7 @@ if page == "Simulator":
             config["layer_data"][i][1] = st.number_input(f"Layer {i+1} Thickness (in)", 0.01, 1.0, config["layer_data"][i][1])
         with c2:
             config["layer_data"][i][2] = st.number_input(f"Layer {i+1} Z (MRayl)", 1.0, 5.0, config["layer_data"][i][2])
-    
+        #pipe_thickness = sum([t for _, t, _ in layer_data])
 
     st.subheader("📌 Defect Settings")
     c1, c2 = st.columns(2)
