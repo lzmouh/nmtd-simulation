@@ -72,9 +72,6 @@ if page == "Simulator":
         defect_layer = st.slider("Defect Layer Index", 1, num_layers, 2)
 
 
-    #st.session_state["defect_type"] = defect_type
-    #st.session_state["defect_layer"] = defect_layer
-
     # ---- Save / Export / Clear ----
     st.markdown("### 💾 Save & Load Configuration")
     col1, col2, col3, col4 = st.columns(4)
@@ -88,6 +85,7 @@ if page == "Simulator":
                 "defect_layer": defect_layer
             }
             st.success("Configuration saved to memory!")
+            st.write({saved_config})
 
     with col2:
         if st.button("🗑️ Clear"):
