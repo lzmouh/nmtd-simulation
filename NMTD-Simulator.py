@@ -43,7 +43,9 @@ config = st.session_state["config"]
 # ---------- SIMULATOR ----------
 if page == "Simulator":
     st.title("🔍 NMTD Ultrasonic Response Simulator")
-
+    
+    #total_thickness = sum(layer[1] for layer in config["layer_data"])
+    
     c1, c2 = st.columns(2)
     with c1:
         config["fluid"] = st.selectbox("Fluid", list(fluid_impedance_db.keys()), index=list(fluid_impedance_db.keys()).index(config["fluid"]))
@@ -71,8 +73,8 @@ if page == "Simulator":
             config["layer_data"][i][1] = st.number_input(f"Layer {i+1} Thickness (in)", 0.01, 1.0, config["layer_data"][i][1])
         with c2:
             config["layer_data"][i][2] = st.number_input(f"Layer {i+1} Z (MRayl)", 1.0, 5.0, config["layer_data"][i][2])
-        total_thickness = sum(layer[1] for layer in config["layer_data"])    
-    #pipe_thickness = sum([t for _, t, _ in layer_data])
+            
+    total_thickness = sum([t for _, t, _ in layer_data])
 
     st.subheader("📌 Defect Settings")
     c1, c2 = st.columns(2)
