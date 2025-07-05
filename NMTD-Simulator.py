@@ -44,9 +44,6 @@ config = st.session_state["config"]
 if page == "Simulator":
     st.title("🔍 NMTD Ultrasonic Response Simulator")
     
-    total_thickness = sum(layer[1] for layer in config["layer_data"])
-    #total_thickness = sum([t for _, t, _ in layer_data])
-    
     c1, c2 = st.columns(2)
     with c1:
         config["fluid"] = st.selectbox("Fluid", list(fluid_impedance_db.keys()), index=list(fluid_impedance_db.keys()).index(config["fluid"]))
@@ -60,6 +57,8 @@ if page == "Simulator":
     with c2:
         config["num_layers"] = st.slider("Number of Layers", 1, 10, config["num_layers"])
         # --- Show total thickness below the layer count ---
+        total_thickness = sum(layer[1] for layer in config["layer_data"])
+        #total_thickness = sum([t for _, t, _ in layer_data])
         st.markdown(f"**📏 Total Pipe Thickness: `{total_thickness:.2f} inches`**")
 
 
