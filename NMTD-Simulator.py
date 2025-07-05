@@ -99,7 +99,7 @@ if page == "Simulator":
             )
 
     config["total_thickness"] = sum([layer[1] for layer in config["layer_data"]])
-    st.write(f"**📏 Total Pipe Thickness: `{config[total_thickness]:.2f}` inches**")
+    st.markdown(f"**📏 Total Pipe Thickness: `{config['total_thickness']:.2f}` inches**")
 
     st.subheader("📌 Defect Settings")
     c1, c2 = st.columns(2)
