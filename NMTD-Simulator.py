@@ -91,9 +91,9 @@ if page == "Simulator":
                 key=f"z_{i}"
             )
 
-        # Total thickness is calculated from current values
-        total_thickness = sum([layer[1] for layer in config["layer_data"]])
-        st.write(f"**📏 Total Pipe Thickness: `{total_thickness:.2f}` inches**")
+    # Total thickness is calculated from current values
+    total_thickness = sum([layer[1] for layer in config["layer_data"]])
+    st.write(f"**📏 Total Pipe Thickness: `{total_thickness:.2f}` inches**")
 
     
     # --- Defect Settings ---
