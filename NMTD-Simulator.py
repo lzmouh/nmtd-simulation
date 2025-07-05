@@ -219,6 +219,7 @@ elif page == "Visualization":
     Z_fluid = config["Z_fluid"]
     defect_type = config["defect_type"]
     defect_layer = config["defect_layer"] - 1  # zero-based index
+    total_thickness = config.get("total_thickness", 1.0)
 
     cmap = plt.get_cmap("tab20")
 
