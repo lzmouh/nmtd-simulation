@@ -330,13 +330,14 @@ elif page == "Visualization":
                           theta1=ang - pad_span / 2,
                           theta2=ang + pad_span / 2,
                           color='red', lw=6, zorder=5))
-    # Optional defects
+
+     # Optional defects
     if defect_type == "Delamination":
         r_delam = r_inner + sum(layer_data[i][1] for i in range(defect_layer))
         delam_ring = Wedge(center=(0, 0),
-                           r=r_delam + 0.005,  # thin white outer ring
+                           r=r_delam + 0.01,  # thin white outer ring
                            theta1=0,
-                           theta2=360,
+                           theta2=45,
                            width=0.01,
                            facecolor='white',
                            edgecolor='red',
