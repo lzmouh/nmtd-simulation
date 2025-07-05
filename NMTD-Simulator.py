@@ -37,6 +37,7 @@ DEFAULT_CONFIG = {
     "fluid_velocity": 1480,
     "num_layers": 5,
     "layer_data": [["Layer 1", 0.2, 2.5]] * 5,
+    "total_thickness": 1.0,
     "defect_type": "None",
     "defect_layer": 2
 }
@@ -97,8 +98,8 @@ if page == "Simulator":
                 value=config["layer_data"][i][2], key=f"z_{i}"
             )
 
-    total_thickness = sum([layer[1] for layer in config["layer_data"]])
-    st.markdown(f"**📏 Total Pipe Thickness: `{total_thickness:.2f}` inches**")
+    config["total_thickness"] = sum([layer[1] for layer in config["layer_data"]])
+    st.markdown(f"**📏 Total Pipe Thickness: `{config[total_thickness]:.2f}` inches**")
 
     st.subheader("📌 Defect Settings")
     c1, c2 = st.columns(2)
