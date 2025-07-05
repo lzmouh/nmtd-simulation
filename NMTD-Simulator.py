@@ -341,7 +341,7 @@ elif page == "Visualization":
                            width=0.01,
                            facecolor='white',
                            edgecolor='red',
-                           lw=2,
+                           lw=0.5,
                            zorder=10)
         ax2.add_patch(delam_ring)
 
