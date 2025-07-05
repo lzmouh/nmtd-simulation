@@ -216,12 +216,12 @@ elif page == "Visualization":
     layer_data = config["layer_data"]
     Z_fluid = config["Z_fluid"]
     defect_type = config["defect_type"]
-    defect_layer = config["defect_layer"] - 1  # zero-indexed
+    defect_layer = config["defect_layer"] - 1  # zero-based index
 
     cmap = plt.get_cmap("tab20")
 
-    # ========== 1) Cross-Section Drawing ==========
-    fig1 = plt.figure(figsize=(16, 4))
+    # --------- 1) Horizontal Cross Section (FULL WIDTH) ---------
+    fig1 = plt.figure(figsize=(16, 3))
     ax1 = fig1.add_subplot(111)
 
     y = 0.2
@@ -234,7 +234,7 @@ elif page == "Visualization":
     ax1.text(x + W_tool / 2, y + H + 0.05, "Tool Body", ha='center')
     x += W_tool
 
-    # Arm in fluid
+    # Arm + Fluid
     W_arm = 0.2
     ax1.add_patch(Rectangle((x, y), W_arm, H, color='skyblue'))
     ax1.add_patch(Rectangle((x, y + H / 2 - 0.05), W_arm, 0.1, color='black'))
@@ -253,115 +253,116 @@ elif page == "Visualization":
     ax1.text(x + W_gap / 2, y + H + 0.05, f"Gap\nZ={Z_fluid:.2f}", ha='center')
     x += W_gap
 
-    # Layers
+    # Pipe Layers
     for i, (label, t, Z) in enumerate(layer_data):
         W = t
         color = cmap(i)
         ax1.add_patch(Rectangle((x, y), W, H, color=color, ec='black'))
-        ax1.text(x + W / 2, y + H + 0.05, f"Layer {i+1}\nZ={Z:.2f}\n{t:.2f}\"", ha='center', fontsize=7)
+        ax1.text(x + W / 2, y + H + 0.05, f"Layer {i+1}\nZ={Z:.2f}\n{t:.2f}\"",
+                 ha='center', fontsize=7)
 
-        # Delamination
         if defect_type == "Delamination" and i == defect_layer:
-            ax1.add_patch(Rectangle((x - 0.01, y), 0.02, H, color='white', ec='red', lw=2))
+            ax1.add_patch(Rectangle((x - 0.01, y), 0.02, H,
+                                    color='white', ec='red', lw=2))
             ax1.text(x, y + H + 0.05, "Delam.", color='red', fontsize=8, ha='left')
-
-        # Crack
-        if defect_type == "Crack" and i == defect_layer:
+        elif defect_type == "Crack" and i == defect_layer:
             ax1.plot([x, x + W], [y + H / 2, y + H / 2], 'k--', lw=2)
             ax1.text(x + W / 2, y - 0.1, "Crack", ha='center', color='black', fontsize=8)
-
         x += W
 
     ax1.set_xlim(0, x + 1)
     ax1.set_ylim(0, y + H + 0.4)
     ax1.axis('off')
     ax1.set_title("Cross-Section: Tool → Arm → Sensor → Gap → Pipe Layers")
-    plt.tight_layout()
-    st.pyplot(fig1)
 
-    # ========== 2) Top View Drawing ==========
+    st.pyplot(fig1, use_container_width=True)
+
+    # --------- 2) Top View Drawing ---------
     fig2 = plt.figure(figsize=(8, 8))
     ax2 = fig2.add_subplot(111)
 
     pipe_id = 6.0
     tool_d = 3.0
     pad_gap = 0.1
-    pad_span = 45  # degrees
+    pad_span = 45
 
     r_inner = pipe_id / 2
+    tool_r = tool_d / 2
     r_current = r_inner
     layer_radii = []
 
-    # Fluid ring
-    ax2.add_patch(Circle((0, 0), r_inner, color='skyblue', ec='black'))
-
-    # Draw pipe layers as cut rings
+    # Draw pipe layers as concentric cut rings
     for i, (_, t, _) in enumerate(layer_data):
         r_outer = r_current + t
-        ax2.add_patch(Circle((0, 0), r_outer, color=cmap(i), ec='black', zorder=1))
+        color = cmap(i)
+        ax2.add_patch(Circle((0, 0), r_outer, color=color, ec='black', zorder=1))
         ax2.add_patch(Circle((0, 0), r_current, color='white', zorder=2))
-        layer_radii.append((r_current, r_outer, cmap(i)))
+        layer_radii.append((r_current, r_outer, color))
         r_current = r_outer
 
-    # Tool body
-    tool_r = tool_d / 2
-    ax2.add_patch(Circle((0, 0), tool_r, color='gray', ec='black'))
+    # Fluid gap ring
+    ax2.add_patch(Circle((0, 0), r_inner, color='skyblue', ec='black', zorder=3))
 
-    # Arms + Pads
+    # Tool body
+    ax2.add_patch(Circle((0, 0), tool_r, color='gray', ec='black', zorder=4))
+
+    # Arms and pads
     for ang in [0, 90, 180, 270]:
         rad = np.deg2rad(ang)
-        x0, y0 = tool_r * np.cos(rad), tool_r * np.sin(rad)
-        x1, y1 = (r_inner - pad_gap) * np.cos(rad), (r_inner - pad_gap) * np.sin(rad)
-        ax2.plot([x0, x1], [y0, y1], 'red', lw=3)
+        x0 = tool_r * np.cos(rad)
+        y0 = tool_r * np.sin(rad)
+        x1 = (r_inner - pad_gap) * np.cos(rad)
+        y1 = (r_inner - pad_gap) * np.sin(rad)
+        ax2.plot([x0, x1], [y0, y1], 'red', lw=3, zorder=5)
         ax2.add_patch(Arc((0, 0),
                           2 * (r_inner - pad_gap),
                           2 * (r_inner - pad_gap),
                           theta1=ang - pad_span / 2,
                           theta2=ang + pad_span / 2,
-                          color='red', lw=6))
+                          color='red', lw=6, zorder=5))
 
-    # Annotate tool and fluid
-    ax2.annotate("Tool Body", xy=(tool_r, 0), xytext=(tool_r + 2, 1.5),
+    # Annotations
+    ax2.annotate("Tool Body", xy=(tool_r, 0), xytext=(tool_r + 1.5, 1.2),
                  arrowprops=dict(arrowstyle="->"), fontsize=9)
-    ax2.annotate("Fluid Gap", xy=(r_inner, 0), xytext=(r_inner + 2, -2),
+    ax2.annotate("Fluid Gap", xy=(r_inner, 0), xytext=(r_inner + 1.5, -1.5),
                  arrowprops=dict(arrowstyle="->"), fontsize=9)
 
-    # Annotate layers radially
     for i, (r_in, r_out, color) in enumerate(layer_radii):
-        angle_deg = 30 + i * 30
-        angle_rad = np.deg2rad(angle_deg)
-        x_arrow = (r_out - 0.1) * np.cos(angle_rad)
-        y_arrow = (r_out - 0.1) * np.sin(angle_rad)
-        x_txt = (r_out + 1.0) * np.cos(angle_rad)
-        y_txt = (r_out + 1.0) * np.sin(angle_rad)
-        ax2.annotate(f"Layer {i+1}", xy=(x_arrow, y_arrow), xytext=(x_txt, y_txt),
-                     fontsize=9, color=color,
+        angle = 30 + i * 25
+        rad = np.deg2rad(angle)
+        x = (r_out - 0.1) * np.cos(rad)
+        y = (r_out - 0.1) * np.sin(rad)
+        xt = (r_out + 1.0) * np.cos(rad)
+        yt = (r_out + 1.0) * np.sin(rad)
+        ax2.annotate(f"Layer {i+1}",
+                     xy=(x, y), xytext=(xt, yt),
+                     color=color, fontsize=9,
                      arrowprops=dict(arrowstyle="->", color=color))
 
-    # Defect display (top view)
+    # Optional defects
     if defect_type == "Delamination":
-        r_d = r_inner + sum(layer_data[i][1] for i in range(defect_layer))
-        ax2.add_patch(Arc((0, 0),
-                          2 * r_d, 2 * r_d,
+        r_def = r_inner + sum(layer_data[i][1] for i in range(defect_layer))
+        ax2.add_patch(Arc((0, 0), 2 * r_def, 2 * r_def,
                           theta1=60, theta2=120,
-                          color='red', lw=4))
+                          color='red', lw=4, zorder=6))
     elif defect_type == "Crack":
-        r_c_start = r_inner + sum(layer_data[i][1] for i in range(defect_layer))
-        r_c_end = r_c_start + layer_data[defect_layer][1]
-        angle_deg = 45
-        angle_rad = np.deg2rad(angle_deg)
-        x1 = r_c_start * np.cos(angle_rad)
-        y1 = r_c_start * np.sin(angle_rad)
-        x2 = r_c_end * np.cos(angle_rad)
-        y2 = r_c_end * np.sin(angle_rad)
-        ax2.plot([x1, x2], [y1, y2], 'black', lw=3, linestyle='--')
+        r_start = r_inner + sum(layer_data[i][1] for i in range(defect_layer))
+        r_end = r_start + layer_data[defect_layer][1]
+        ang = np.deg2rad(45)
+        x1 = r_start * np.cos(ang)
+        y1 = r_start * np.sin(ang)
+        x2 = r_end * np.cos(ang)
+        y2 = r_end * np.sin(ang)
+        ax2.plot([x1, x2], [y1, y2], 'black', lw=2, linestyle='--', zorder=6)
 
     ax2.set_aspect('equal')
     ax2.set_xlim(-r_current - 2, r_current + 2)
     ax2.set_ylim(-r_current - 2, r_current + 2)
     ax2.axis('off')
     ax2.set_title("Top View: Tool & Pads inside Multilayer Pipe")
+
     st.pyplot(fig2)
+    
 
 # -------------------- ABOUT --------------------
 elif page == "About":
