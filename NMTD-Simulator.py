@@ -383,7 +383,7 @@ elif page == "Visualization":
         # Add annotation for crack
         ax2.annotate("Crack",
             xy=((x1 + x2) / 2, (y1 + y2) / 2),
-            xytext=((x1 + x2) / 2 + 1.0, (y1 + y2) / 2 - 1.0),
+            xytext=((x2 + total_thickness + 1.0, y2 + total_thickness + 1.0),
             color='black',
             fontsize=7,
             arrowprops=dict(arrowstyle="->", color='black'))
