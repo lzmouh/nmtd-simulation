@@ -380,18 +380,6 @@ elif page == "Visualization":
             fontsize=7,
             arrowprops=dict(arrowstyle="->", color='black'))
     
-
-    # Annotations
-    # Choose angle rad to which annotation points
-    ang_b = 315 # Example 315 degrees S-E
-    rad_b = np.deg2rad(ang)
-    xb = tool_r * np.cos(rad)
-    yb = tool_r * np.sin(rad)
-    ax2.annotate("Tool Body", xy=(xb, yb), xytext=(xb + 3.5, yb + 3.5),
-                 arrowprops=dict(arrowstyle="->"), fontsize=7)
-    ax2.annotate("Fluid Gap", xy=(r_inner, 0), xytext=(r_inner + 3.5, 0),
-                 arrowprops=dict(arrowstyle="->"), fontsize=7)
-
     for i, (r_in, r_out, color) in enumerate(layer_radii):
         angle = 30 + i * 25
         rad = np.deg2rad(angle)
@@ -403,7 +391,23 @@ elif page == "Visualization":
                      xy=(x, y), xytext=(xt, yt),
                      color=color, fontsize=7,
                      arrowprops=dict(arrowstyle="->", color=color))
-        
+
+    # Tool Body Annotation
+    angle = 315
+    rad = np.deg2rad(angle)
+    x = tool_r * np.cos(rad)
+    y = tool_r * np.sin(rad)
+    xt = (tool_r + 2.0) * np.cos(rad)
+    yt = (tool_r + 2.0) * np.sin(rad)
+    
+    ax2.annotate("Tool Body",
+                 xy=(x, y),
+                 xytext=(xt, yt),
+                 arrowprops=dict(arrowstyle="->", color='black'),
+                 fontsize=8,
+                 color='black')
+
+    
     # Sensor Annotation
     r_sensor = r_inner - pad_gap  # where pads are drawn
     angle = 270
@@ -419,6 +423,11 @@ elif page == "Visualization":
                  arrowprops=dict(arrowstyle="->", color='red'),
                  fontsize=8,
                  color='red')
+
+    # Annotations
+    ax2.annotate("Fluid Gap", xy=(r_inner, 0), xytext=(r_inner + 3.5, 0),
+                 arrowprops=dict(arrowstyle="->"), fontsize=7)
+
 
     ax2.set_aspect('equal')
     ax2.set_xlim(-r_current - 2, r_current + 2)
