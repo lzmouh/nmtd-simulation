@@ -382,7 +382,12 @@ elif page == "Visualization":
     
 
     # Annotations
-    ax2.annotate("Tool Body", xy=(0, -tool_r), xytext=(tool_r + 4.5, -2),
+    # Choose angle rad to which annotation points
+    ang_b = 270 # Example 270 degrees
+    rad_b = np.deg2rad(ang)
+    xb = tool_r * np.cos(rad)
+    yb = tool_r * np.sin(rad)
+    ax2.annotate("Tool Body", xy=(xb, yb), xytext=(xb + 3.5, yb + 3.5),
                  arrowprops=dict(arrowstyle="->"), fontsize=7)
     ax2.annotate("Fluid Gap", xy=(r_inner, 0), xytext=(r_inner + 3.5, 0),
                  arrowprops=dict(arrowstyle="->"), fontsize=7)
