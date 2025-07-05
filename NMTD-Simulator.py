@@ -290,20 +290,22 @@ elif page == "Visualization":
         pipe_id = 6.0
         tool_d = 3.0
         pad_gap = 0.1
-        pad_span = 45
+        pad_span = 45  # degrees
     
         r_inner = pipe_id / 2
-        r = r_inner
-        ring_radii = []
-    
-        # Draw concentric pipe layers from inner to outer
-        for i, (_, t, _) in enumerate(layer_data):
-            r += t
-            ring_radii.append(r)
-            ax2.add_patch(Circle((0, 0), r, color=cmap(i), ec='black'))
+        r_current = r_inner
+        layer_radii = []
     
         # Fluid ring
         ax2.add_patch(Circle((0, 0), r_inner, color='skyblue', ec='black'))
+    
+        # Draw pipe layers as concentric segments
+        for i, (_, t, _) in enumerate(layer_data):
+            r_next = r_current + t
+            ax2.add_patch(Circle((0, 0), r_next, color=cmap(i), ec='black', zorder=1))
+            ax2.add_patch(Circle((0, 0), r_current, color='white', zorder=2))  # cut inner part
+            r_current = r_next
+            layer_radii.append(r_current)
     
         # Tool body
         tool_r = tool_d / 2
@@ -322,35 +324,40 @@ elif page == "Visualization":
                               theta2=ang + pad_span / 2,
                               color='red', lw=6))
     
-        # Annotations
-        ax2.annotate("Tool Body", xy=(tool_r, 0), xytext=(tool_r + 1, 1),
-                     arrowprops=dict(arrowstyle="->"), fontsize=9)
-        ax2.annotate("Fluid Gap", xy=(r_inner, 0), xytext=(r_inner + 1, -1),
+        # Tool annotation
+        ax2.annotate("Tool Body",
+                     xy=(tool_r, 0), xytext=(tool_r + 2, 1),
                      arrowprops=dict(arrowstyle="->"), fontsize=9)
     
-        # Spread annotations across angles
-        for i, r_layer in enumerate(ring_radii):
-            angle = 45 + i * 30
+        # Fluid gap annotation
+        ax2.annotate("Fluid Gap",
+                     xy=(r_inner, 0), xytext=(r_inner + 2, -2),
+                     arrowprops=dict(arrowstyle="->"), fontsize=9)
+    
+        # Layer annotations (spread at increasing angles)
+        for i, r_layer in enumerate(layer_radii):
+            angle = 30 + i * 25  # Spread to avoid clutter
             angle_rad = np.deg2rad(angle)
-            x_txt = (r_layer + 0.5) * np.cos(angle_rad)
-            y_txt = (r_layer + 0.5) * np.sin(angle_rad)
+            x_inner = (r_layer - 0.1) * np.cos(angle_rad)
+            y_inner = (r_layer - 0.1) * np.sin(angle_rad)
+            x_txt = (r_layer + 1.0) * np.cos(angle_rad)
+            y_txt = (r_layer + 1.0) * np.sin(angle_rad)
             ax2.annotate(f"Layer {i+1}",
-                         xy=((r_layer - 0.2) * np.cos(angle_rad),
-                             (r_layer - 0.2) * np.sin(angle_rad)),
+                         xy=(x_inner, y_inner),
                          xytext=(x_txt, y_txt),
-                         arrowprops=dict(arrowstyle="->", color=cmap(i)),
-                         color=cmap(i), fontsize=8)
+                         color=cmap(i),
+                         fontsize=9,
+                         arrowprops=dict(arrowstyle="->", color=cmap(i)))
     
         ax2.set_aspect('equal')
-        ax2.set_xlim(-r - 2, r + 2)
-        ax2.set_ylim(-r - 2, r + 2)
+        ax2.set_xlim(-r_current - 3, r_current + 3)
+        ax2.set_ylim(-r_current - 3, r_current + 3)
         ax2.axis('off')
         ax2.set_title("Top View: Tool & Pads inside Multilayer Pipe")
     
         plt.tight_layout()
         return fig
         
-    fig = plt.figure(figsize=(16, 12))  # Wider and taller
     fig = draw_nmted_visualization(layer_data, Z_fluid, defect_type, defect_layer)
     st.pyplot(fig)
 
