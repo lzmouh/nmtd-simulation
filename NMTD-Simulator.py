@@ -374,22 +374,6 @@ elif page == "Visualization":
                      color=color, fontsize=9,
                      arrowprops=dict(arrowstyle="->", color=color))
 
-    # Optional defects
-    if defect_type == "Delamination":
-        r_def = r_inner + sum(layer_data[i][1] for i in range(defect_layer))
-        ax2.add_patch(Arc((0, 0), 2 * r_def, 2 * r_def,
-                          theta1=60, theta2=120,
-                          color='red', lw=4, zorder=6))
-    elif defect_type == "Crack":
-        r_start = r_inner + sum(layer_data[i][1] for i in range(defect_layer))
-        r_end = r_start + layer_data[defect_layer][1]
-        ang = np.deg2rad(45)
-        x1 = r_start * np.cos(ang)
-        y1 = r_start * np.sin(ang)
-        x2 = r_end * np.cos(ang)
-        y2 = r_end * np.sin(ang)
-        ax2.plot([x1, x2], [y1, y2], 'black', lw=2, linestyle='--', zorder=6)
-
     ax2.set_aspect('equal')
     ax2.set_xlim(-r_current - 2, r_current + 2)
     ax2.set_ylim(-r_current - 2, r_current + 2)
