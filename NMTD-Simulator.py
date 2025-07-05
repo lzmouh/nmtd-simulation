@@ -358,7 +358,7 @@ elif page == "Visualization":
         ax2.add_patch(delam_ring)
         # Add annotation for delamination
         ax2.annotate("Delamination",
-            xy=(r_delam + 0.01, 90),
+            xy=(r_delam + total_thickness + 1.0,- r_delam - total_thickness - 1.0),
             xytext=(r_delam + 1.0, -1.0),
             color='red',
             fontsize=7,
@@ -399,8 +399,8 @@ elif page == "Visualization":
     rad = np.deg2rad(angle)
     x = tool_r * np.cos(rad)
     y = tool_r * np.sin(rad)
-    xt = (tool_r + total_thickness + 1.0) * np.cos(rad)
-    yt = (tool_r + total_thickness + 1.0) * np.sin(rad)
+    xt = (r_inner + total_thickness + 1.0) * np.cos(rad)
+    yt = (r_inner + total_thickness + 1.0) * np.sin(rad)
     
     ax2.annotate("Tool Body",
                  xy=(x, y),
