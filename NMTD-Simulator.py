@@ -398,7 +398,38 @@ elif page == "Visualization":
                      xy=(x, y), xytext=(xt, yt),
                      color=color, fontsize=7,
                      arrowprops=dict(arrowstyle="->", color=color))
+        
+    # Tool Body Annotation
+    angle = 135  # adjust angle for placement
+    rad = np.deg2rad(angle)
+    r_tool = tool_d / 2
+    x = r_tool * np.cos(rad)
+    y = r_tool * np.sin(rad)
+    xt = (r_tool + 1.0) * np.cos(rad)
+    yt = (r_tool + 1.0) * np.sin(rad)
+    
+    ax2.annotate("Tool Body",
+                 xy=(x, y),
+                 xytext=(xt, yt),
+                 arrowprops=dict(arrowstyle="->"),
+                 fontsize=8,
+                 color='gray')
 
+    # Sensor Annotation
+    r_sensor = r_inner - pad_gap  # where pads are drawn
+    angle = 45
+    rad = np.deg2rad(angle)
+    x = r_sensor * np.cos(rad)
+    y = r_sensor * np.sin(rad)
+    xt = (r_sensor + 1.0) * np.cos(rad)
+    yt = (r_sensor + 1.0) * np.sin(rad)
+    
+    ax2.annotate("Sensor Pad",
+                 xy=(x, y),
+                 xytext=(xt, yt),
+                 arrowprops=dict(arrowstyle="->", color='red'),
+                 fontsize=8,
+                 color='red')
 
     ax2.set_aspect('equal')
     ax2.set_xlim(-r_current - 2, r_current + 2)
