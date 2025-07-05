@@ -221,7 +221,7 @@ elif page == "Visualization":
     cmap = plt.get_cmap("tab20")
 
     # ========== 1) Cross-Section Drawing ==========
-    fig1 = plt.figure(figsize=(14, 3))
+    fig1 = plt.figure(figsize=(14, 10))
     ax1 = fig1.add_subplot(111)
 
     y = 0.2
