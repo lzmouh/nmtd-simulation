@@ -298,9 +298,6 @@ elif page == "Visualization":
         r_outer = r_current + t
         color = cmap(i)
         
-        #Only outermost layer gets black edge
-        edge = 'black' if i == len(layer_data) else None
-        
         ring = Wedge(center=(0, 0),
                      r=r_outer,
                      theta1=0,
@@ -308,12 +305,21 @@ elif page == "Visualization":
                      width=t,
                      facecolor=color,
                      edgecolor=None,
-                     lw=1 if edge else 0,
+                     lw=0,
                      zorder=1)
         ax2.add_patch(ring)
         layer_radii.append((r_current, r_outer, color))
         r_current = r_outer    
 
+    # Add thin black ring for outer pipe surface
+    outer_radius = r_current  # r_current already includes all layer thickness
+    ax2.add_patch(Circle((0, 0),
+                         radius=outer_radius,
+                         edgecolor='black',
+                         facecolor='none',
+                         lw=2,
+                         zorder=10))
+    
     # Fluid gap ring
     ax2.add_patch(Circle((0, 0), r_inner, color='skyblue', ec='black', zorder=3))
 
