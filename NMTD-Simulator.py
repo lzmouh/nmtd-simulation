@@ -350,6 +350,7 @@ elif page == "Visualization":
         plt.tight_layout()
         return fig
         
+    fig = plt.figure(figsize=(16, 12))  # Wider and taller
     fig = draw_nmted_visualization(layer_data, Z_fluid, defect_type, defect_layer)
     st.pyplot(fig)
 
