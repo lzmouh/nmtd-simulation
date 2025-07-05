@@ -69,7 +69,7 @@ if page == "Simulator":
         with c1:
             config["layer_data"][i][1] = st.number_input(f"Layer {i+1} Thickness (in)", 0.01, 1.0, config["layer_data"][i][1])
         with c2:
-            config["layer_data"][i][2] = st.number_input(f"Layer {i+1} Z (MRayl)", 0.5, 5.0, config["layer_data"][i][2]
+            config["layer_data"][i][2] = st.number_input(f"Layer {i+1} Z (MRayl)", 0.5, 5.0, config["layer_data"][i][2])
 
     st.subheader("📌 Defect Settings")
     c1, c2 = st.columns(2)
