@@ -350,16 +350,22 @@ elif page == "Visualization":
                            r=r_delam + 0.01,  # thin white outer ring
                            theta1=270,
                            theta2=315,
-                           width=0.01,
+                           width=0.05,
                            facecolor='white',
                            edgecolor='red',
-                           lw=0.5,
+                           lw=0.2,
                            zorder=10)
         ax2.add_patch(delam_ring)
         # Add annotation for delamination
+        angle = 292.5
+        rad = np.deg2rad(angle)
+        x = r_delam * np.cos(rad)
+        y = r_delam * np.sin(rad)
+        xt = (r_delam + total_thickness + 1.0) * np.cos(rad)
+        yt = (r_delam + total_thickness + 1.0) * np.sin(rad)
         ax2.annotate("Delamination",
-            xy=(r_delam + total_thickness + 1.0,- r_delam - total_thickness - 1.0),
-            xytext=(r_delam + 1.0, -1.0),
+            xy=(x , y),
+            xytext=(xt , yt),
             color='red',
             fontsize=7,
             arrowprops=dict(arrowstyle="->", color='red'))
