@@ -6,6 +6,7 @@ from matplotlib.patches import Arc, Rectangle, Circle
 from scipy.fft import fft, fftfreq
 import json
 import pandas as pd
+from matplotlib.patches import Wedge
 
 # ---------- CONSTANTS ----------
 INCH_TO_METER = 0.0254
@@ -278,7 +279,7 @@ elif page == "Visualization":
     st.pyplot(fig1, use_container_width=True)
 
     # --------- 2) Top View Drawing ---------
-    fig2 = plt.figure(figsize=(8, 8))
+    fig2 = plt.figure(figsize=(6, 6))
     ax2 = fig2.add_subplot(111)
 
     pipe_id = 6.0
@@ -291,8 +292,6 @@ elif page == "Visualization":
     r_current = r_inner
     layer_radii = []
 
-    # Draw pipe layers as concentric cut rings
-    from matplotlib.patches import Wedge
     
     # Step 1: Draw pipe layers as full ring segments (Wedges)
     for i, (_, t, _) in enumerate(layer_data):
