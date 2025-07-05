@@ -344,6 +344,14 @@ elif page == "Visualization":
                            lw=0.5,
                            zorder=10)
         ax2.add_patch(delam_ring)
+        # Add annotation for delamination
+        ax2.annotate("Delamination",
+            xy=(r_delam + 0.01, 0),
+            xytext=(r_delam + 1.0, -1.0),
+            color='red',
+            fontsize=7,
+            arrowprops=dict(arrowstyle="->", color='red'))
+
 
     elif defect_type == "Crack":
         r_start = r_inner + sum(layer_data[i][1] for i in range(defect_layer))
@@ -354,6 +362,13 @@ elif page == "Visualization":
         x2 = r_end * np.cos(ang)
         y2 = r_end * np.sin(ang)
         ax2.plot([x1, x2], [y1, y2], 'black', lw=2, linestyle='--', zorder=10)
+        # Add annotation for crack
+        ax2.annotate("Crack",
+            xy=((x1 + x2) / 2, (y1 + y2) / 2),
+            xytext=((x1 + x2) / 2 + 1.0, (y1 + y2) / 2 - 1.0),
+            color='black',
+            fontsize=7,
+            arrowprops=dict(arrowstyle="->", color='black'))
     
 
     # Annotations
@@ -373,22 +388,7 @@ elif page == "Visualization":
                      xy=(x, y), xytext=(xt, yt),
                      color=color, fontsize=7,
                      arrowprops=dict(arrowstyle="->", color=color))
-    
-    # Add annotation for delamination
-    ax2.annotate("Delamination",
-        xy=(r_delam + 0.01, 0),
-        xytext=(r_delam + 1.0, -1.0),
-        color='red',
-        fontsize=7,
-        arrowprops=dict(arrowstyle="->", color='red'))
 
-    # Add annotation for crack
-    ax2.annotate("Crack",
-        xy=((x1 + x2) / 2, (y1 + y2) / 2),
-        xytext=((x1 + x2) / 2 + 1.0, (y1 + y2) / 2 - 1.0),
-        color='black',
-        fontsize=7,
-        arrowprops=dict(arrowstyle="->", color='black'))
 
     ax2.set_aspect('equal')
     ax2.set_xlim(-r_current - 2, r_current + 2)
