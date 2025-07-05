@@ -276,6 +276,7 @@ elif page == "Visualization":
     ax1.set_ylim(0, y + H + 0.4)
     ax1.axis('off')
     ax1.set_title("Cross-Section: Tool → Arm → Sensor → Gap → Pipe Layers")
+    plt.tight_layout()
     st.pyplot(fig1)
 
     # ========== 2) Top View Drawing ==========
