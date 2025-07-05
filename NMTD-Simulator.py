@@ -346,8 +346,8 @@ elif page == "Visualization":
         r_delam = r_inner + sum(layer_data[i][1] for i in range(defect_layer))
         delam_ring = Wedge(center=(0, 0),
                            r=r_delam + 0.01,  # thin white outer ring
-                           theta1=0,
-                           theta2=45,
+                           theta1=270,
+                           theta2=315,
                            width=0.01,
                            facecolor='white',
                            edgecolor='red',
@@ -356,7 +356,7 @@ elif page == "Visualization":
         ax2.add_patch(delam_ring)
         # Add annotation for delamination
         ax2.annotate("Delamination",
-            xy=(r_delam + 0.01, 0),
+            xy=(r_delam + 0.01, 315),
             xytext=(r_delam + 1.0, -1.0),
             color='red',
             fontsize=7,
