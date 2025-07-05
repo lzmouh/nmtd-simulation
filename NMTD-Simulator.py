@@ -292,13 +292,24 @@ elif page == "Visualization":
     layer_radii = []
 
     # Draw pipe layers as concentric cut rings
+    from matplotlib.patches import Wedge
+    
+    # Step 1: Draw pipe layers as full ring segments (Wedges)
     for i, (_, t, _) in enumerate(layer_data):
         r_outer = r_current + t
         color = cmap(i)
-        ax2.add_patch(Circle((0, 0), r_outer, color=color, ec='black', zorder=1))
-        ax2.add_patch(Circle((0, 0), r_current, color='white', zorder=2))
+        ring = Wedge(center=(0, 0),
+                     r=r_outer,
+                     theta1=0,
+                     theta2=360,
+                     width=t,
+                     facecolor=color,
+                     edgecolor='black',
+                     lw=1,
+                     zorder=1)
+        ax2.add_patch(ring)
         layer_radii.append((r_current, r_outer, color))
-        r_current = r_outer
+        r_current = r_outer    
 
     # Fluid gap ring
     ax2.add_patch(Circle((0, 0), r_inner, color='skyblue', ec='black', zorder=3))
