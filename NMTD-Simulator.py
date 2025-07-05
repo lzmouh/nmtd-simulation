@@ -297,6 +297,10 @@ elif page == "Visualization":
     for i, (_, t, _) in enumerate(layer_data):
         r_outer = r_current + t
         color = cmap(i)
+        
+        #Only outermost layer gets black edge
+        edge = 'black' if i == len(layer_data) - 1 else None
+        
         ring = Wedge(center=(0, 0),
                      r=r_outer,
                      theta1=0,
@@ -304,7 +308,7 @@ elif page == "Visualization":
                      width=t,
                      facecolor=color,
                      edgecolor=None,
-                     lw=1,
+                     lw=1 if edge else 0,
                      zorder=1)
         ax2.add_patch(ring)
         layer_radii.append((r_current, r_outer, color))
