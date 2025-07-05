@@ -383,7 +383,7 @@ elif page == "Visualization":
 
     # Annotations
     # Choose angle rad to which annotation points
-    ang_b = 270 # Example 270 degrees
+    ang_b = 315 # Example 315 degrees S-E
     rad_b = np.deg2rad(ang)
     xb = tool_r * np.cos(rad)
     yb = tool_r * np.sin(rad)
