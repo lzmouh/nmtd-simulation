@@ -330,6 +330,30 @@ elif page == "Visualization":
                           theta1=ang - pad_span / 2,
                           theta2=ang + pad_span / 2,
                           color='red', lw=6, zorder=5))
+    # Optional defects
+    if defect_type == "Delamination":
+        r_delam = r_inner + sum(layer_data[i][1] for i in range(defect_layer))
+        delam_ring = Wedge(center=(0, 0),
+                           r=r_delam + 0.005,  # thin white outer ring
+                           theta1=0,
+                           theta2=360,
+                           width=0.01,
+                           facecolor='white',
+                           edgecolor='red',
+                           lw=2,
+                           zorder=10)
+        ax2.add_patch(delam_ring)
+
+    elif defect_type == "Crack":
+        r_start = r_inner + sum(layer_data[i][1] for i in range(defect_layer))
+        r_end = r_start + layer_data[defect_layer][1]
+        ang = np.deg2rad(45)
+        x1 = r_start * np.cos(ang)
+        y1 = r_start * np.sin(ang)
+        x2 = r_end * np.cos(ang)
+        y2 = r_end * np.sin(ang)
+        ax2.plot([x1, x2], [y1, y2], 'black', lw=2, linestyle='--', zorder=10)
+    
 
     # Annotations
     ax2.annotate("Tool Body", xy=(tool_r, 0), xytext=(tool_r + 1.5, 1.2),
