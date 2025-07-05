@@ -374,7 +374,7 @@ elif page == "Visualization":
     elif defect_type == "Crack":
         r_start = r_inner + sum(layer_data[i][1] for i in range(defect_layer))
         r_end = r_start + layer_data[defect_layer][1]
-        ang = np.deg2rad(0)
+        ang = np.deg2rad(10)
         x1 = r_start * np.cos(ang)
         y1 = r_start * np.sin(ang)
         x2 = r_end * np.cos(ang)
