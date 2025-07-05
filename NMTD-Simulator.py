@@ -346,8 +346,8 @@ elif page == "Visualization":
         r_delam = r_inner + sum(layer_data[i][1] for i in range(defect_layer))
         delam_ring = Wedge(center=(0, 0),
                            r=r_delam + 0.01,  # thin white outer ring
-                           theta1=0,
-                           theta2=45,
+                           theta1=45,
+                           theta2=90,
                            width=0.01,
                            facecolor='white',
                            edgecolor='red',
@@ -366,7 +366,7 @@ elif page == "Visualization":
     elif defect_type == "Crack":
         r_start = r_inner + sum(layer_data[i][1] for i in range(defect_layer))
         r_end = r_start + layer_data[defect_layer][1]
-        ang = np.deg2rad(45)
+        ang = np.deg2rad(0)
         x1 = r_start * np.cos(ang)
         y1 = r_start * np.sin(ang)
         x2 = r_end * np.cos(ang)
