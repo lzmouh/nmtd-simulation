@@ -48,7 +48,7 @@ if page == "Simulator":
     with c1:
         config["fluid"] = st.selectbox("Fluid", list(fluid_impedance_db.keys()), index=list(fluid_impedance_db.keys()).index(config["fluid"]))
         if config["fluid"] == "Other":
-            density = st.number_input("Fluid Density (g/cc)", 0.5, 2.5, 1.0)
+            density = st.number_input("Fluid Density (g/cc)", 0, 1.0, 2.0)
             config["Z_fluid"] = density * 1.48
         else:
             config["Z_fluid"] = fluid_impedance_db[config["fluid"]]
@@ -56,6 +56,9 @@ if page == "Simulator":
 
     with c2:
         config["num_layers"] = st.slider("Number of Layers", 1, 10, config["num_layers"])
+        # --- Show total thickness below the layer count --- 
+        total_thickness = sum(layer[1] for layer in config["layer_data"])
+        st.markdown(f"**📏 Total Pipe Thickness: `{total_thickness:.2f} inches`**")       
     
     config["layer_data"] = config["layer_data"][:config["num_layers"]]
     st.markdown("### 📦 Layers Configuration")
@@ -66,12 +69,7 @@ if page == "Simulator":
         with c1:
             config["layer_data"][i][1] = st.number_input(f"Layer {i+1} Thickness (in)", 0.01, 1.0, config["layer_data"][i][1])
         with c2:
-            config["layer_data"][i][2] = st.number_input(f"Layer {i+1} Z (MRayl)", 1.0, 5.0, config["layer_data"][i][2])
-    
-    # --- Show total thickness below the layer count --- 
-    total_thickness = sum(layer[1] for layer in config["layer_data"])
-    #total_thickness = sum([t for _, t, _ in layer_data])
-    st.markdown(f"**📏 Total Pipe Thickness: `{total_thickness:.2f} inches`**")       
+            config["layer_data"][i][2] = st.number_input(f"Layer {i+1} Z (MRayl)", 0.5, 5.0, config["layer_data"][i][2]
 
     st.subheader("📌 Defect Settings")
     c1, c2 = st.columns(2)
