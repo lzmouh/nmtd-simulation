@@ -382,8 +382,8 @@ elif page == "Visualization":
     
 
     # Annotations
-    ax2.annotate("Tool Body", xy=(tool_r, 0), xytext=(tool_r + 1.5, 1.2),
-                 arrowprops=dict(arrowstyle="->"), fontsize=7)
+    #ax2.annotate("Tool Body", xy=(tool_r, 0), xytext=(tool_r + 1.5, 1.2),
+    #             arrowprops=dict(arrowstyle="->"), fontsize=7)
     ax2.annotate("Fluid Gap", xy=(r_inner, 0), xytext=(r_inner + 1.5, -1.5),
                  arrowprops=dict(arrowstyle="->"), fontsize=7)
 
