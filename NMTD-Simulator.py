@@ -414,8 +414,8 @@ elif page == "Visualization":
     rad = np.deg2rad(angle)
     x = r_sensor * np.cos(rad)
     y = r_sensor * np.sin(rad)
-    xt = (r_sensor + 2.0) * np.cos(rad)
-    yt = (r_sensor + 2.0) * np.sin(rad)
+    xt = (r_inner + total_thickness + 1.0) * np.cos(rad)
+    yt = (r_inner + total_thickness + 1.0) * np.sin(rad)
     
     ax2.annotate("Sensor Pad",
                  xy=(x, y),
@@ -424,8 +424,8 @@ elif page == "Visualization":
                  fontsize=8,
                  color='red')
 
-    # Annotations
-    ax2.annotate("Fluid Gap", xy=(r_inner, 0), xytext=(r_inner + 3.5, 0),
+    # Annotations Fluid Gap
+    ax2.annotate("Fluid Gap", xy=(r_inner, 0), xytext=(r_inner + total_thickness + 1.0, 0),
                  arrowprops=dict(arrowstyle="->"), fontsize=7)
 
 
