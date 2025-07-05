@@ -417,7 +417,7 @@ elif page == "Visualization":
 
     # Sensor Annotation
     r_sensor = r_inner - pad_gap  # where pads are drawn
-    angle = 45
+    angle = 180
     rad = np.deg2rad(angle)
     x = r_sensor * np.cos(rad)
     y = r_sensor * np.sin(rad)
