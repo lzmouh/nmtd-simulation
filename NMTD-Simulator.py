@@ -303,7 +303,7 @@ elif page == "Visualization":
                      theta2=360,
                      width=t,
                      facecolor=color,
-                     edgecolor='black',
+                     edgecolor=None,
                      lw=1,
                      zorder=1)
         ax2.add_patch(ring)
@@ -358,9 +358,9 @@ elif page == "Visualization":
 
     # Annotations
     ax2.annotate("Tool Body", xy=(tool_r, 0), xytext=(tool_r + 1.5, 1.2),
-                 arrowprops=dict(arrowstyle="->"), fontsize=9)
+                 arrowprops=dict(arrowstyle="->"), fontsize=7)
     ax2.annotate("Fluid Gap", xy=(r_inner, 0), xytext=(r_inner + 1.5, -1.5),
-                 arrowprops=dict(arrowstyle="->"), fontsize=9)
+                 arrowprops=dict(arrowstyle="->"), fontsize=7)
 
     for i, (r_in, r_out, color) in enumerate(layer_radii):
         angle = 30 + i * 25
@@ -371,8 +371,24 @@ elif page == "Visualization":
         yt = (r_out + 1.0) * np.sin(rad)
         ax2.annotate(f"Layer {i+1}",
                      xy=(x, y), xytext=(xt, yt),
-                     color=color, fontsize=9,
+                     color=color, fontsize=7,
                      arrowprops=dict(arrowstyle="->", color=color))
+    
+    # Add annotation for delamination
+    ax2.annotate("Delamination",
+        xy=(r_delam + 0.01, 0),
+        xytext=(r_delam + 1.0, -1.0),
+        color='red',
+        fontsize=7,
+        arrowprops=dict(arrowstyle="->", color='red'))
+
+    # Add annotation for crack
+    ax2.annotate("Crack",
+        xy=((x1 + x2) / 2, (y1 + y2) / 2),
+        xytext=((x1 + x2) / 2 + 1.0, (y1 + y2) / 2 - 1.0),
+        color='black',
+        fontsize=7,
+        arrowprops=dict(arrowstyle="->", color='black'))
 
     ax2.set_aspect('equal')
     ax2.set_xlim(-r_current - 2, r_current + 2)
