@@ -35,65 +35,89 @@ st.set_page_config(page_title="NMTD Simulator", layout="wide")
 st.sidebar.title("📁 Menu")
 page = st.sidebar.radio("Navigation", ["Simulator", "Plots", "Visualization", "About"])
 
+# ---------- STATE ----------
+if "config" not in st.session_state:
+    st.session_state["config"] = json.loads(json.dumps(DEFAULT_CONFIG))  # deep copy
 
-if "layer_data" not in st.session_state:
-    st.session_state["layer_data"] = []
-if "Z_fluid" not in st.session_state:
-    st.session_state["Z_fluid"] = 1.48
-    
+config = st.session_state["config"]
 
 # -------------------- SIMULATOR --------------------
 if page == "Simulator":
     st.title("🔍 NMTD Ultrasonic Response Simulator")
 
     col1, col2 = st.columns(2)
+
+    # --- Fluid selection ---
     with col1:
-        fluid = st.selectbox("Select Borehole Fluid", list(fluid_impedance_db.keys()))
-        if fluid == "Other":
+        config["fluid"] = st.selectbox(
+            "Select Borehole Fluid", list(fluid_impedance_db.keys()),
+            index=list(fluid_impedance_db.keys()).index(config["fluid"])
+        )
+        if config["fluid"] == "Other":
             fluid_density = st.number_input("Fluid Density (g/cc)", 0.5, 2.5, 1.0)
-            Z_fluid = fluid_density * 1.48
+            config["Z_fluid"] = fluid_density * 1.48
         else:
-            Z_fluid = fluid_impedance_db[fluid]
-        st.write(f"**Z_fluid** = {Z_fluid:.2f} MRayl")
+            config["Z_fluid"] = fluid_impedance_db[config["fluid"]]
+        st.write(f"**Z_fluid = {config['Z_fluid']:.2f} MRayl**")
 
+    # --- Number of layers + total thickness display ---
     with col2:
-        num_layers = st.slider("Number of Layers", 1, 10, 5)
+        config["num_layers"] = st.slider("Number of Layers", 1, 10, config["num_layers"])
 
-    layer_data = []
+        # Ensure layer_data list is correct length
+        config["layer_data"] = config["layer_data"][:config["num_layers"]]
+        while len(config["layer_data"]) < config["num_layers"]:
+            config["layer_data"].append(
+                [f"Layer {len(config['layer_data'])+1}", 0.2, 2.5]
+            )
+
+        # Total thickness is calculated from current values
+        total_thickness = sum([layer[1] for layer in config["layer_data"]])
+        st.write(f"**📏 Total Pipe Thickness: `{total_thickness:.2f}` inches**")
+
+    # --- Layers configuration ---
     st.markdown("### 📦 Layers Configuration")
-    for i in range(num_layers):
+    for i in range(config["num_layers"]):
         c1, c2 = st.columns(2)
         with c1:
-            t = st.number_input(f"Layer {i+1} Thickness (in)", value=0.2, key=f"t{i}")
+            config["layer_data"][i][1] = st.number_input(
+                f"Layer {i+1} Thickness (in)",
+                min_value=0.01, max_value=1.0,
+                value=config["layer_data"][i][1],
+                key=f"t_{i}"
+            )
         with c2:
-            z = st.number_input(f"Layer {i+1} Impedance (MRayl)", value=2.5, key=f"z{i}")
-        layer_data.append((f"Layer {i+1}", t, z))
-    
-    pipe_thickness = sum([t for _, t, _ in layer_data])
+            config["layer_data"][i][2] = st.number_input(
+                f"Layer {i+1} Impedance (MRayl)",
+                min_value=1.0, max_value=5.0,
+                value=config["layer_data"][i][2],
+                key=f"z_{i}"
+            )
 
-    with col2:
-        st.write(f"**Total Pipe Thickness** = {pipe_thickness:.2f} inches")
-
+    # --- Defect Settings ---
     st.subheader("📌 Defect Settings")
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        defect_type = st.selectbox("Defect Type", ["None", "Delamination", "Crack"])
-        
-    with col2:
-        defect_layer = st.slider("Defect Layer Index", 1, num_layers, 2)
+    c1, c2 = st.columns(2)
+    with c1:
+        config["defect_type"] = st.selectbox(
+            "Defect Type", ["None", "Delamination", "Crack"],
+            index=["None", "Delamination", "Crack"].index(config["defect_type"])
+        )
+    with c2:
+        config["defect_layer"] = st.slider(
+            "Defect Layer Index", 1, config["num_layers"], config["defect_layer"]
+        )
 
-
-    # ---- Save / Export / Load ----
+    # --- Save / Load / Reset ---
     st.markdown("### 💾 Save / Load / Export")
     col1, col2, col3 = st.columns(3)
 
-
     with col1:
-        st.download_button("📤 Export Config (.json)",
+        st.download_button(
+            "📤 Export Config (.json)",
             data=json.dumps(config, indent=2),
             file_name="nmted_config.json",
-            mime="application/json")
+            mime="application/json"
+        )
 
     with col2:
         uploaded = st.file_uploader("⬆️ Load Config (.json)", type="json")
@@ -101,7 +125,7 @@ if page == "Simulator":
             loaded = json.load(uploaded)
             if "layer_data" in loaded:
                 st.session_state["config"] = loaded
-                st.success("Config loaded.")
+                st.success("Configuration loaded.")
                 st.rerun()
 
     with col3:
