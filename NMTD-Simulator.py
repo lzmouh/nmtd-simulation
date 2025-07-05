@@ -37,7 +37,7 @@ page = st.sidebar.radio("Navigation", ["Simulator", "Plots", "Visualization", "A
 
 # ---------- STATE ----------
 if "config" not in st.session_state:
-    st.session_state["config"] = json.loads(json.dumps(DEFAULT_CONFIG))  # deep copy
+    st.session_state["config"] = []
 
 config = st.session_state["config"]
 
