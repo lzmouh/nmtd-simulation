@@ -346,8 +346,8 @@ elif page == "Visualization":
         r_delam = r_inner + sum(layer_data[i][1] for i in range(defect_layer))
         delam_ring = Wedge(center=(0, 0),
                            r=r_delam + 0.01,  # thin white outer ring
-                           theta1=45,
-                           theta2=90,
+                           theta1=0,
+                           theta2=45,
                            width=0.01,
                            facecolor='white',
                            edgecolor='red',
