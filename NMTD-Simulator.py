@@ -71,10 +71,6 @@ if page == "Simulator":
                 [f"Layer {len(config['layer_data'])+1}", 0.2, 2.5]
             )
 
-        # Total thickness is calculated from current values
-        total_thickness = sum([layer[1] for layer in config["layer_data"]])
-        st.write(f"**📏 Total Pipe Thickness: `{total_thickness:.2f}` inches**")
-
     # --- Layers configuration ---
     st.markdown("### 📦 Layers Configuration")
     for i in range(config["num_layers"]):
@@ -94,6 +90,11 @@ if page == "Simulator":
                 key=f"z_{i}"
             )
 
+        # Total thickness is calculated from current values
+        total_thickness = sum([layer[1] for layer in config["layer_data"]])
+        st.write(f"**📏 Total Pipe Thickness: `{total_thickness:.2f}` inches**")
+
+    
     # --- Defect Settings ---
     st.subheader("📌 Defect Settings")
     c1, c2 = st.columns(2)
