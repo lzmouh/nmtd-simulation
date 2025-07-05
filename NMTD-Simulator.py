@@ -317,7 +317,7 @@ elif page == "Visualization":
                          radius=outer_radius,
                          edgecolor='black',
                          facecolor='none',
-                         lw=2,
+                         lw=1,
                          zorder=10))
     
     # Fluid gap ring
