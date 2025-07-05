@@ -415,8 +415,8 @@ elif page == "Visualization":
     rad = np.deg2rad(angle)
     x = r_sensor * np.cos(rad)
     y = r_sensor * np.sin(rad)
-    xt = (r_inner + total_thickness + 1.0) * np.cos(rad)
-    yt = (r_inner + total_thickness + 1.0) * np.sin(rad)
+    xt = (r_inner + 1.0) * np.cos(rad)
+    yt = (r_inner + 1.0) * np.sin(rad)
     
     ax2.annotate("Sensor Pad",
                  xy=(x, y),
