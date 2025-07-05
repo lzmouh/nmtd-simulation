@@ -382,9 +382,9 @@ elif page == "Visualization":
     
 
     # Annotations
-    #ax2.annotate("Tool Body", xy=(tool_r, 0), xytext=(tool_r + 1.5, 1.2),
-    #             arrowprops=dict(arrowstyle="->"), fontsize=7)
-    ax2.annotate("Fluid Gap", xy=(r_inner, 0), xytext=(r_inner + 1.5, -1.5),
+    ax2.annotate("Tool Body", xy=(tool_r, 0), xytext=(tool_r + 2.5, 1.2),
+                 arrowprops=dict(arrowstyle="->"), fontsize=7)
+    ax2.annotate("Fluid Gap", xy=(r_inner, 0), xytext=(r_inner + 2.5, -1.5),
                  arrowprops=dict(arrowstyle="->"), fontsize=7)
 
     for i, (r_in, r_out, color) in enumerate(layer_radii):
@@ -399,22 +399,6 @@ elif page == "Visualization":
                      color=color, fontsize=7,
                      arrowprops=dict(arrowstyle="->", color=color))
         
-    # Tool Body Annotation
-    angle = 135  # adjust angle for placement
-    rad = np.deg2rad(angle)
-    r_tool = tool_d / 2
-    x = r_tool * np.cos(rad)
-    y = r_tool * np.sin(rad)
-    xt = (r_tool + 1.0) * np.cos(rad)
-    yt = (r_tool + 1.0) * np.sin(rad)
-    
-    ax2.annotate("Tool Body",
-                 xy=(x, y),
-                 xytext=(xt, yt),
-                 arrowprops=dict(arrowstyle="->"),
-                 fontsize=8,
-                 color='gray')
-
     # Sensor Annotation
     r_sensor = r_inner - pad_gap  # where pads are drawn
     angle = 270
