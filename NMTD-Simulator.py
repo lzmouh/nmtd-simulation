@@ -43,7 +43,7 @@ DEFAULT_CONFIG = {
 # ---------- SETUP ----------
 st.set_page_config(page_title="NMTD Simulator", layout="wide")
 st.sidebar.title("📁 Menu")
-page = st.sidebar.radio("Navigation", ["Simulator", "Plots", "About"])
+page = st.sidebar.radio("Navigation", ["Simulator", "Plots", "Visualization", "About"])
 
 if "config" not in st.session_state:
     st.session_state["config"] = json.loads(json.dumps(DEFAULT_CONFIG))  # deep copy
