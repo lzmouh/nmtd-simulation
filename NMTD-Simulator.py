@@ -299,7 +299,7 @@ elif page == "Visualization":
         color = cmap(i)
         
         #Only outermost layer gets black edge
-        edge = 'black' if i == len(layer_data) - 1 else None
+        edge = 'black' if i == len(layer_data) else None
         
         ring = Wedge(center=(0, 0),
                      r=r_outer,
